@@ -37,6 +37,7 @@ class SettingsPayload(BaseModel):
     global_shortcut: str
     resume_stabilization_on_launch: bool
     minimize_to_tray: bool
+    keyboard_cadence_telemetry: bool = False
     system_mouse: bool
     gaze_source: str
     gaze_dwell_ms: int
@@ -81,6 +82,7 @@ class SettingsUpdateRequest(BaseModel):
     global_shortcut: str | None = Field(default=None, max_length=64)
     resume_stabilization_on_launch: bool | None = None
     minimize_to_tray: bool | None = None
+    keyboard_cadence_telemetry: bool | None = None
     system_mouse: bool | None = None
     gaze_source: Literal["head", "eyes"] | None = None
     gaze_dwell_ms: int | None = Field(default=None, ge=600, le=2000)
@@ -147,4 +149,40 @@ class ClinicalEventRequest(BaseModel):
     timestamp: float | None = None
     dosage: str = Field(default="", max_length=80)
     severity: int | None = Field(default=None, ge=1, le=5)
+    notes: str = Field(default="", max_length=400)
+
+
+class HoldSamplePoint(BaseModel):
+    x: float
+    y: float
+    t: float
+
+
+class TapEventPoint(BaseModel):
+    target_x: float
+    target_y: float
+    click_x: float
+    click_y: float
+    reaction_ms: float | None = Field(default=None, ge=0.0, le=30000.0)
+
+
+class MotorCheckinRequest(BaseModel):
+    hold_samples: list[HoldSamplePoint] = Field(min_length=5, max_length=3000)
+    target_x: float
+    target_y: float
+    taps: list[TapEventPoint] = Field(default_factory=list, max_length=20)
+    tap_hit_radius_px: float = Field(default=28.0, ge=4.0, le=120.0)
+    context_tag: Literal["routine", "baseline", "pre_medication", "post_medication", "flare"] = "routine"
+    notes: str = Field(default="", max_length=400)
+
+
+class RestingHandCheckinRequest(BaseModel):
+    mode: Literal["samples", "webcam"] = "webcam"
+    samples: list[HoldSamplePoint] | None = Field(default=None, max_length=3000)
+    duration_sec: float = Field(default=10.0, ge=2.0, le=30.0)
+    camera_index: int = Field(default=0, ge=0)
+    prefer_backend: Literal["auto", "mediapipe", "opencv"] = "auto"
+    context_tag: Literal[
+        "resting_hand", "routine", "baseline", "pre_medication", "post_medication", "flare"
+    ] = "resting_hand"
     notes: str = Field(default="", max_length=400)

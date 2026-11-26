@@ -33,6 +33,8 @@ Thumbs.db
 .vscode/
 .idea/
 .cursor/
+.codex/
+.gemini/
 *.swp
 
 # Packaging
@@ -56,5 +58,6 @@ src-tauri/binaries/*
 
 # Local scratch / root manifest
 .superpowers/
+.impeccable/config.local.json
 *.patch
 /manifest.json
