@@ -471,4 +471,97 @@ describe("ClearCursor Frontend Suite", () => {
       expect(promptSpy).toHaveBeenCalledWith("accessibility", false)
     );
   });
+
+  it("toggles Light and Dark desktop themes and renders Opt-In Keyboard Timing setting", async () => {
+    vi.spyOn(client, "fetchSettings").mockResolvedValueOnce(BASE_SETTINGS);
+    vi.spyOn(client, "fetchSystemPermissions").mockResolvedValueOnce({
+      platform: "macos",
+      accessibility_trusted: true,
+      input_monitoring_trusted: true,
+      needs_prompt: false,
+      message: null,
+    });
+
+    render(<App />);
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /^Dark$/i })).toBeInTheDocument()
+    );
+    fireEvent.click(screen.getByRole("button", { name: /^Dark$/i }));
+    expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
+
+    fireEvent.click(screen.getByRole("button", { name: /^Light$/i }));
+    expect(document.documentElement.getAttribute("data-theme")).toBe("light");
+
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    render(<SensitivityPanel settings={BASE_SETTINGS} saving={false} onSave={onSave} />);
+    fireEvent.click(screen.getByRole("button", { name: /Opt-In Keyboard Timing Telemetry/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Save Settings/i }));
+    await waitFor(() => {
+      expect(onSave).toHaveBeenCalledWith(
+        expect.objectContaining({ keyboard_cadence_telemetry: true })
+      );
+    });
+  });
+
+  it("renders honest coverage metrics, 15-second motor check-in panel, and keyboard cadence summary", async () => {
+    const payload: SessionsResponse = {
+      active_session_id: "s2",
+      sessions: [],
+      daily_trends: [],
+      hourly_profile: [],
+      coverage_summary: {
+        telemetry_scope: "functional_computer_use",
+        scope_description: "Passive functional motor telemetry during active pointer use.",
+        window_days: 14,
+        active_days: 5,
+        active_hours_of_day: 8,
+        total_active_minutes: 95,
+        checkin_count: 1,
+        keyboard_cadence_windows: 3,
+      },
+      motor_checkins: [
+        {
+          id: 10,
+          session_id: "s2",
+          timestamp: 1700000300,
+          context_tag: "post_medication",
+          duration_sec: 10.0,
+          overall_score: 91.5,
+          hold_stability_score: 90.0,
+          hold_rms_px: 2.8,
+          hold_rms_mm: 0.74,
+          hold_dominant_hz: 5.1,
+          hold_resting_band_pct: 14.0,
+          hold_action_band_pct: 5.0,
+          hold_tremor_index: 19.0,
+          tap_count: 4,
+          tap_accuracy_pct: 100.0,
+          tap_mean_error_px: 4.2,
+          tap_mean_reaction_ms: 410.0,
+          notes: "Steady after dose",
+        },
+      ],
+      keyboard_cadence_summary: {
+        window_count: 3,
+        total_keystrokes: 75,
+        avg_hold_ms: 92.4,
+        avg_flight_ms: 148.2,
+        avg_cadence_kpm: 245.0,
+        avg_regularity_score: 88.6,
+      },
+      calibration_profiles: [],
+    };
+    vi.spyOn(client, "fetchSessions").mockResolvedValueOnce(payload);
+
+    render(<SessionHistory />);
+    await waitFor(() =>
+      expect(screen.getByText(/Functional Computer-Use Telemetry Coverage/i)).toBeInTheDocument()
+    );
+    expect(screen.getByText(/5 \/ 14 active days/i)).toBeInTheDocument();
+    expect(screen.getByText(/95 active min \(8\/24 hrs covered\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/15-Second Guided Motor Check-In/i)).toBeInTheDocument();
+    expect(screen.getByText(/Steady after dose/i)).toBeInTheDocument();
+    expect(screen.getByText(/Keyboard Timing Biomarkers \(Opt-In\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/92\.4 ms/i)).toBeInTheDocument();
+  });
 });

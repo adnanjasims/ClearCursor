@@ -1,25 +1,62 @@
 @import "tailwindcss";
 
-:root {
-  --tc-bg: #F5F5F7;
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  --tc-bg: #F2F2F7;
+  --tc-sidebar: #F8F8FA;
   --tc-surface: #FFFFFF;
-  --tc-surface-alt: #EBEEF5;
-  --tc-mint: #E8F0FE;
-  --tc-ink: #0B1324;
-  --tc-ink-muted: #42526E;
-  --tc-primary: #0F2D59;
-  --tc-primary-hover: #0A1F3F;
-  --tc-accent: #1D4ED8;
+  --tc-surface-alt: #EDEDF2;
+  --tc-mint: #EBF4FF;
+  --tc-ink: #1C1C1E;
+  --tc-ink-muted: #55555E;
+  --tc-primary: #0066CC;
+  --tc-primary-hover: #0052A3;
+  --tc-primary-ink: #0050A3;
+  --tc-accent: #0A84FF;
   --tc-on-primary: #FFFFFF;
-  --tc-focus: #1D4ED8;
-  --tc-alert: #9F1239;
+  --tc-focus: #0066CC;
+  --tc-success: #15803D;
+  --tc-success-bg: #ECFDF3;
+  --tc-alert: #BE123C;
   --tc-alert-bg: #FFF1F2;
-  --tc-warn: #854D0E;
-  --tc-warn-bg: #FEFCE8;
-  --tc-border: #D5DCE6;
-  --tc-border-strong: #475569;
-  --tc-shadow: 0 2px 12px rgba(11, 19, 36, 0.05), 0 1px 2px rgba(11, 19, 36, 0.04);
-  --tc-shadow-lg: 0 12px 32px rgba(11, 19, 36, 0.08), 0 2px 6px rgba(11, 19, 36, 0.04);
+  --tc-warn: #9A5B04;
+  --tc-warn-bg: #FEF9E7;
+  --tc-border: #DFDFE6;
+  --tc-border-strong: #B6B6C2;
+  --tc-chart-grid: #E5E5EC;
+  --tc-chart-axis: #55555E;
+  --tc-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 1px rgba(15, 23, 42, 0.02);
+  --tc-shadow-lg: 0 10px 28px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --tc-bg: #0C0E12;
+  --tc-sidebar: #11141A;
+  --tc-surface: #171B22;
+  --tc-surface-alt: #1F252F;
+  --tc-mint: #16263E;
+  --tc-ink: #F2F4F8;
+  --tc-ink-muted: #9BA5B4;
+  --tc-primary: #1D68D8;
+  --tc-primary-hover: #2E78E8;
+  --tc-primary-ink: #93C5FD;
+  --tc-accent: #60A5FA;
+  --tc-on-primary: #FFFFFF;
+  --tc-focus: #60A5FA;
+  --tc-success: #34D399;
+  --tc-success-bg: #0F2920;
+  --tc-alert: #FB7185;
+  --tc-alert-bg: #31151E;
+  --tc-warn: #FBBF24;
+  --tc-warn-bg: #2B2110;
+  --tc-border: #252B36;
+  --tc-border-strong: #3B4454;
+  --tc-chart-grid: #252B36;
+  --tc-chart-axis: #9BA5B4;
+  --tc-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
+  --tc-shadow-lg: 0 14px 36px rgba(0, 0, 0, 0.45);
 }
 
 * {
@@ -32,9 +69,11 @@ body {
   padding: 0;
   background-color: var(--tc-bg);
   color: var(--tc-ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  caret-color: var(--tc-primary);
 }
 
 ::selection {
@@ -43,77 +82,113 @@ body {
 }
 
 :focus-visible {
-  outline: 3px solid var(--tc-focus);
+  outline: 2.5px solid var(--tc-focus);
   outline-offset: 2px;
+}
+
+a {
+  text-underline-offset: 3px;
 }
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
-/* Custom oversized 56px accessible range slider hitbox and thumb */
+/* Native desktop card surface with subtle 1px hairline */
+.cc-card {
+  background-color: var(--tc-surface);
+  border: 1px solid var(--tc-border);
+  border-radius: 14px;
+  box-shadow: var(--tc-shadow);
+}
+
+/* Oversized 48px accessible range slider with theme-aware filled progress track */
 input[type="range"].tc-slider {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 56px;
+  height: 48px;
   background: transparent;
   cursor: pointer;
 }
 
 input[type="range"].tc-slider::-webkit-slider-runnable-track {
   width: 100%;
-  height: 14px;
+  height: 10px;
   border-radius: 9999px;
-  background: var(--tc-surface-alt);
-  border: 2px solid var(--tc-border-strong);
+  background: linear-gradient(
+    to right,
+    var(--tc-primary) 0%,
+    var(--tc-primary) var(--slider-pct, 50%),
+    var(--tc-surface-alt) var(--slider-pct, 50%),
+    var(--tc-surface-alt) 100%
+  );
+  border: 1px solid var(--tc-border-strong);
 }
 
 input[type="range"].tc-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 36px;
-  height: 36px;
-  margin-top: -13px;
+  width: 30px;
+  height: 30px;
+  margin-top: -11px;
   border-radius: 9999px;
-  background: var(--tc-primary);
-  border: 3px solid var(--tc-on-primary);
-  box-shadow: 0 2px 6px rgba(1, 48, 90, 0.25);
+  background: var(--tc-surface);
+  border: 2.5px solid var(--tc-primary);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.2);
   cursor: pointer;
+  transition: transform 140ms ease-out;
+}
+
+input[type="range"].tc-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.06);
 }
 
 input[type="range"].tc-slider::-moz-range-track {
   width: 100%;
-  height: 14px;
+  height: 10px;
   border-radius: 9999px;
   background: var(--tc-surface-alt);
-  border: 2px solid var(--tc-border-strong);
+  border: 1px solid var(--tc-border-strong);
+}
+
+input[type="range"].tc-slider::-moz-range-progress {
+  height: 10px;
+  border-radius: 9999px;
+  background: var(--tc-primary);
 }
 
 input[type="range"].tc-slider::-moz-range-thumb {
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   border-radius: 9999px;
-  background: var(--tc-primary);
-  border: 3px solid var(--tc-on-primary);
-  box-shadow: 0 2px 6px rgba(1, 48, 90, 0.25);
+  background: var(--tc-surface);
+  border: 2.5px solid var(--tc-primary);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.2);
   cursor: pointer;
 }
 
-/* Subtle custom scrollbar matching the warm parchment shell */
+/* Native desktop scrollbars themed to the active palette */
 ::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--tc-surface-alt);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--tc-border-strong);
-  border-radius: 6px;
-  border: 2px solid var(--tc-surface-alt);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--tc-ink-muted);
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
 @media (prefers-reduced-motion: reduce) {
