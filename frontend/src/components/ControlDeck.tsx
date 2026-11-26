@@ -10,7 +10,15 @@ import {
   Waves,
 } from "lucide-react";
 import { useRef, useState } from "react";
-import { Area, AreaChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, YAxis } from "recharts";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  YAxis,
+} from "recharts";
 import { clearCalibration, pushSteadyHandSample } from "../api/client";
 import type { ConnectionState, TelemetryPoint } from "../hooks/useTelemetry";
 import { CLINICAL_PRESETS, type ClinicalPreset } from "../presets";
@@ -113,32 +121,37 @@ export function ControlDeck({
       : [{ idx: 0, score: 100 }];
 
   return (
-    <div className="space-y-8">
-      {/* Medication State Quick-Switch Presets */}
-      <section aria-labelledby="medication-presets-heading">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+    <div className="space-y-6">
+      {/* Comfort & Medication State Presets */}
+      <section aria-labelledby="medication-presets-heading" className="space-y-3.5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 id="medication-presets-heading" className="text-2xl font-bold text-[var(--tc-ink)]">
+            <h2
+              id="medication-presets-heading"
+              className="text-lg font-semibold text-[var(--tc-ink)]"
+            >
               Comfort &amp; Medication State Presets
             </h2>
-            <p className="mt-1 text-base text-[var(--tc-ink-muted)]">
-              Choose how much stabilization you want right now with one large tap. Toggle shortcut:{" "}
-              <span className="font-bold text-[var(--tc-ink)]">{settings.global_shortcut}</span>
+            <p className="mt-0.5 text-sm text-[var(--tc-ink-muted)]">
+              One tap adjusts smoothing strength, click-freeze, and magnetism. Toggle shortcut:{" "}
+              <kbd className="rounded bg-[var(--tc-surface-alt)] px-1.5 py-0.5 font-mono text-xs font-semibold text-[var(--tc-ink)]">
+                {settings.global_shortcut}
+              </kbd>
             </p>
           </div>
           <button
             type="button"
             onClick={onStartCalibration}
-            className="inline-flex min-h-14 items-center gap-3 rounded-lg border-2 border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-6 text-base font-bold text-[var(--tc-ink)] hover:bg-[var(--tc-mint)]"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-4 text-sm font-medium text-[var(--tc-ink)] transition-colors hover:bg-[var(--tc-surface-alt)]"
           >
-            <Eye className="h-5 w-5 shrink-0" aria-hidden="true" />
+            <Eye className="h-4 w-4 shrink-0 text-[var(--tc-primary-ink)]" aria-hidden="true" />
             <span>
               {frame?.gaze.calibrated ? "Recalibrate Gaze" : "Run Gaze Calibration"}
             </span>
           </button>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {CLINICAL_PRESETS.map((preset) => {
             const selected = settings.profile === preset.id;
             return (
@@ -148,26 +161,28 @@ export function ControlDeck({
                 disabled={toggling}
                 aria-pressed={selected}
                 onClick={() => void handleSelectPreset(preset)}
-                className={`flex min-h-[116px] flex-col justify-between rounded-lg border-2 p-5 text-left transition-colors ${
+                className={`flex min-h-[112px] flex-col justify-between rounded-2xl border p-4 text-left transition-colors ${
                   selected
                     ? "border-[var(--tc-primary)] bg-[var(--tc-mint)] text-[var(--tc-ink)]"
-                    : "border-[var(--tc-border-strong)] bg-[var(--tc-surface)] text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)]"
+                    : "border-[var(--tc-border)] bg-[var(--tc-surface)] text-[var(--tc-ink)] shadow-[var(--tc-shadow)] hover:bg-[var(--tc-surface-alt)]"
                 }`}
               >
                 <div>
-                  <span className="block text-lg font-bold">{preset.label}</span>
-                  <span className="mt-1.5 block text-sm text-[var(--tc-ink-muted)]">
+                  <span className="block text-sm font-semibold text-[var(--tc-ink)]">
+                    {preset.label}
+                  </span>
+                  <span className="mt-1 block text-xs leading-relaxed text-[var(--tc-ink-muted)]">
                     {preset.tagline}
                   </span>
                 </div>
                 <span
-                  className={`mt-3 inline-block self-start rounded-sm px-3 py-1 text-xs font-bold uppercase ${
+                  className={`mt-3 inline-flex self-start rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                     selected
                       ? "bg-[var(--tc-primary)] text-white"
-                      : "bg-[var(--tc-surface-alt)] text-[var(--tc-ink)]"
+                      : "bg-[var(--tc-surface-alt)] text-[var(--tc-ink-muted)]"
                   }`}
                 >
-                  {selected ? "Active Preset" : "Select"}
+                  {selected ? "Active" : "Select"}
                 </span>
               </button>
             );
@@ -175,13 +190,16 @@ export function ControlDeck({
         </div>
       </section>
 
-      {/* Primary Assistance Toggles */}
-      <section aria-labelledby="primary-modes-heading">
-        <h2 id="primary-modes-heading" className="mb-4 text-2xl font-bold text-[var(--tc-ink)]">
+      {/* Active System Assistance */}
+      <section aria-labelledby="primary-modes-heading" className="space-y-3.5">
+        <h2
+          id="primary-modes-heading"
+          className="text-lg font-semibold text-[var(--tc-ink)]"
+        >
           Active System Assistance
         </h2>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2">
           <button
             type="button"
             disabled={toggling}
@@ -189,37 +207,39 @@ export function ControlDeck({
             onClick={() =>
               void onToggle({ steady_hand: !steadyActive, assistance_enabled: true })
             }
-            className={`flex min-h-[112px] w-full items-center justify-between gap-6 rounded-lg border-2 p-6 text-left transition-colors ${
+            className={`flex min-h-[104px] w-full items-center justify-between gap-4 rounded-2xl border p-5 text-left transition-colors ${
               steadyActive
-                ? "border-[var(--tc-primary)] bg-[var(--tc-mint)] text-[var(--tc-ink)]"
-                : "border-[var(--tc-border-strong)] bg-[var(--tc-surface)] text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)]"
+                ? "border-[var(--tc-primary)] bg-[var(--tc-mint)]"
+                : "border-[var(--tc-border)] bg-[var(--tc-surface)] shadow-[var(--tc-shadow)] hover:bg-[var(--tc-surface-alt)]"
             }`}
           >
-            <div className="flex items-start gap-4">
+            <div className="flex items-start gap-3.5">
               <div
-                className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-md ${
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
                   steadyActive
                     ? "bg-[var(--tc-primary)] text-white"
-                    : "bg-[var(--tc-surface-alt)] text-[var(--tc-ink)]"
+                    : "bg-[var(--tc-surface-alt)] text-[var(--tc-ink-muted)]"
                 }`}
               >
-                <Hand className="h-7 w-7" aria-hidden="true" />
+                <Hand className="h-5 w-5" aria-hidden="true" />
               </div>
               <div>
-                <span className="block text-xl font-bold">SteadyHand Stabilization</span>
-                <span className="mt-1 block text-base text-[var(--tc-ink-muted)]">
+                <span className="block text-base font-semibold text-[var(--tc-ink)]">
+                  SteadyHand Stabilization
+                </span>
+                <span className="mt-0.5 block text-sm text-[var(--tc-ink-muted)]">
                   Delta-space smoothing, click-freeze, bounce guard, and button magnetism.
                 </span>
               </div>
             </div>
             <span
-              className={`shrink-0 rounded-sm px-4 py-2 text-base font-bold ${
+              className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
                 steadyActive
                   ? "bg-[var(--tc-primary)] text-white"
-                  : "border-2 border-[var(--tc-border-strong)] bg-[var(--tc-surface-alt)] text-[var(--tc-ink)]"
+                  : "bg-[var(--tc-surface-alt)] text-[var(--tc-ink-muted)]"
               }`}
             >
-              {steadyActive ? "ACTIVE" : "OFF"}
+              {steadyActive ? "Active" : "Off"}
             </span>
           </button>
 
@@ -243,58 +263,58 @@ export function ControlDeck({
                     }
               )
             }
-            className={`flex min-h-[112px] w-full items-center justify-between gap-6 rounded-lg border-2 p-6 text-left transition-colors ${
+            className={`flex min-h-[104px] w-full items-center justify-between gap-4 rounded-2xl border p-5 text-left transition-colors ${
               gazeActive
-                ? "border-[var(--tc-primary)] bg-[var(--tc-mint)] text-[var(--tc-ink)]"
-                : "border-[var(--tc-border-strong)] bg-[var(--tc-surface)] text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)]"
+                ? "border-[var(--tc-primary)] bg-[var(--tc-mint)]"
+                : "border-[var(--tc-border)] bg-[var(--tc-surface)] shadow-[var(--tc-shadow)] hover:bg-[var(--tc-surface-alt)]"
             }`}
           >
-            <div className="flex items-start gap-4">
+            <div className="flex items-start gap-3.5">
               <div
-                className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-md ${
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
                   gazeActive
                     ? "bg-[var(--tc-primary)] text-white"
-                    : "bg-[var(--tc-surface-alt)] text-[var(--tc-ink)]"
+                    : "bg-[var(--tc-surface-alt)] text-[var(--tc-ink-muted)]"
                 }`}
               >
-                <Camera className="h-7 w-7" aria-hidden="true" />
+                <Camera className="h-5 w-5" aria-hidden="true" />
               </div>
               <div>
-                <span className="block text-xl font-bold">GazeControl Tracking</span>
-                <span className="mt-1 block text-base text-[var(--tc-ink-muted)]">
+                <span className="block text-base font-semibold text-[var(--tc-ink)]">
+                  GazeControl Tracking
+                </span>
+                <span className="mt-0.5 block text-sm text-[var(--tc-ink-muted)]">
                   Webcam head and iris pointing with dwell or blink click.
                 </span>
               </div>
             </div>
             <span
-              className={`shrink-0 rounded-sm px-4 py-2 text-base font-bold ${
+              className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
                 gazeActive
                   ? "bg-[var(--tc-primary)] text-white"
-                  : "border-2 border-[var(--tc-border-strong)] bg-[var(--tc-surface-alt)] text-[var(--tc-ink)]"
+                  : "bg-[var(--tc-surface-alt)] text-[var(--tc-ink-muted)]"
               }`}
             >
-              {gazeActive ? (cameraRunning ? "TRACKING" : "ON") : "OFF"}
+              {gazeActive ? (cameraRunning ? "Tracking" : "On") : "Off"}
             </span>
           </button>
         </div>
 
         {/* OS Tap + Secondary Toggles */}
-        <div className="mt-4 flex flex-wrap items-center gap-4">
+        <div className="flex flex-wrap items-center gap-2.5">
           <button
             type="button"
             disabled={toggling}
             aria-pressed={sysMouseActive}
             onClick={() => void onToggle({ system_mouse: !sysMouseActive })}
-            className={`inline-flex min-h-14 items-center gap-3 rounded-lg border-2 px-5 text-base font-bold ${
+            className={`inline-flex min-h-11 items-center gap-2 rounded-xl border px-4 text-sm font-medium transition-colors ${
               sysMouseActive
-                ? "border-[var(--tc-primary)] bg-[var(--tc-mint)] text-[var(--tc-primary)]"
-                : "border-[var(--tc-border-strong)] bg-[var(--tc-surface)] text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)]"
+                ? "border-[var(--tc-primary)] bg-[var(--tc-mint)] text-[var(--tc-primary-ink)]"
+                : "border-[var(--tc-border)] bg-[var(--tc-surface)] text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)]"
             }`}
           >
-            <MousePointerClick className="h-5 w-5 shrink-0" aria-hidden="true" />
-            <span>
-              System-Wide Cursor Intercept: {sysMouseActive ? "ON" : "OFF"}
-            </span>
+            <MousePointerClick className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span>System-Wide Cursor Intercept: {sysMouseActive ? "ON" : "OFF"}</span>
           </button>
 
           <button
@@ -302,18 +322,18 @@ export function ControlDeck({
             disabled={toggling}
             aria-pressed={simActive}
             onClick={() => void onToggle({ simulate_tremor: !simActive })}
-            className={`inline-flex min-h-14 items-center gap-3 rounded-lg border-2 px-5 text-base font-bold ${
+            className={`inline-flex min-h-11 items-center gap-2 rounded-xl border px-4 text-sm font-medium transition-colors ${
               simActive
-                ? "border-[var(--tc-alert)] bg-[var(--tc-alert-bg)] text-[var(--tc-alert)]"
-                : "border-[var(--tc-border-strong)] bg-[var(--tc-surface)] text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)]"
+                ? "border-[var(--tc-alert)]/40 bg-[var(--tc-alert-bg)] text-[var(--tc-alert)]"
+                : "border-[var(--tc-border)] bg-[var(--tc-surface)] text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)]"
             }`}
           >
-            <Waves className="h-5 w-5 shrink-0" aria-hidden="true" />
+            <Waves className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span>4-7 Hz Tremor Simulation: {simActive ? "ON" : "OFF"}</span>
           </button>
 
-          <div className="inline-flex min-h-14 items-center gap-2 rounded-lg border-2 border-[var(--tc-border)] bg-[var(--tc-surface)] px-4 text-sm font-semibold text-[var(--tc-ink)]">
-            <Magnet className="h-5 w-5 text-[var(--tc-primary)]" aria-hidden="true" />
+          <div className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--tc-border)] bg-[var(--tc-surface)] px-3.5 text-sm text-[var(--tc-ink)]">
+            <Magnet className="h-4 w-4 text-[var(--tc-primary-ink)]" aria-hidden="true" />
             <span>
               Gravity Wells:{" "}
               {settings.gravity_wells
@@ -325,7 +345,7 @@ export function ControlDeck({
           </div>
 
           {(bypassActive || precisionActive || excludedApp) && (
-            <div className="inline-flex min-h-14 items-center gap-2 rounded-lg border-2 border-[var(--tc-warn)] bg-[var(--tc-warn-bg)] px-4 text-sm font-bold text-[var(--tc-warn)]">
+            <div className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--tc-warn-bg)] px-3.5 text-sm font-semibold text-[var(--tc-warn)]">
               <span>
                 {excludedApp
                   ? `Auto-Paused for ${excludedApp}`
@@ -340,62 +360,63 @@ export function ControlDeck({
         {tapError && sysMouseActive && (
           <div
             role="status"
-            className="mt-4 rounded-lg border-2 border-[var(--tc-alert)] bg-[var(--tc-alert-bg)] p-4 text-sm font-semibold text-[var(--tc-alert)]"
+            className="rounded-xl bg-[var(--tc-alert-bg)] px-4 py-3 text-sm font-medium text-[var(--tc-alert)]"
           >
             OS Interception ({tapMode}): {tapError}
           </div>
         )}
       </section>
 
-      {/* Live Telemetry & Stability Monitor */}
-      <section aria-labelledby="telemetry-heading" className="border-t-2 border-[var(--tc-border)] pt-8">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-          <h2 id="telemetry-heading" className="text-2xl font-bold text-[var(--tc-ink)]">
+      {/* Live Stability Monitor */}
+      <section aria-labelledby="telemetry-heading" className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="telemetry-heading" className="text-lg font-semibold text-[var(--tc-ink)]">
             Live Stability Monitor
           </h2>
-          <span className="text-sm font-semibold text-[var(--tc-ink-muted)]">
-            Stream: {connectionState === "connected" ? "30 Hz live" : connectionState} | OS Hook: {tapMode}
+          <span className="font-mono text-xs text-[var(--tc-ink-muted)]">
+            Stream: {connectionState === "connected" ? "30 Hz live" : connectionState} | Hook:{" "}
+            {tapMode}
           </span>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-lg border-2 border-[var(--tc-border)] bg-[var(--tc-surface)] p-5">
-            <div className="flex items-center justify-between text-sm font-semibold text-[var(--tc-ink-muted)]">
+        <div className="cc-card grid grid-cols-1 divide-y divide-[var(--tc-border)] sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x">
+          <div className="p-5">
+            <div className="flex items-center justify-between text-xs font-medium text-[var(--tc-ink-muted)]">
               <span>Stability Score</span>
-              <ShieldCheck className="h-5 w-5 text-[var(--tc-primary)]" aria-hidden="true" />
+              <ShieldCheck className="h-4 w-4 text-[var(--tc-primary-ink)]" aria-hidden="true" />
             </div>
-            <p className="mt-3 text-4xl font-bold text-[var(--tc-ink)] tabular-nums">
+            <p className="mt-2.5 text-3xl font-semibold tracking-tight text-[var(--tc-ink)] tabular-nums">
               {smoothedScore.toFixed(1)}
-              <span className="ml-1 text-lg font-semibold text-[var(--tc-ink-muted)]">/ 100</span>
+              <span className="ml-1 text-sm font-normal text-[var(--tc-ink-muted)]">/ 100</span>
             </p>
-            <p className="mt-2 text-sm text-[var(--tc-ink-muted)]">
+            <p className="mt-1.5 text-xs text-[var(--tc-ink-muted)] tabular-nums">
               {steadyActive ? `RMS jitter: ${rmsMm.toFixed(2)} mm` : "Raw unfiltered cursor"}
             </p>
           </div>
 
           <div
-            className={`rounded-lg border-2 p-5 ${
-              inTremorBand
-                ? "border-[var(--tc-alert)] bg-[var(--tc-alert-bg)]"
-                : "border-[var(--tc-border)] bg-[var(--tc-surface)]"
+            className={`p-5 ${
+              inTremorBand ? "bg-[var(--tc-alert-bg)]/70" : ""
             }`}
           >
-            <div className="flex items-center justify-between text-sm font-semibold text-[var(--tc-ink-muted)]">
+            <div className="flex items-center justify-between text-xs font-medium text-[var(--tc-ink-muted)]">
               <span>Tremor Spectrum (4-12 Hz)</span>
               <Activity
-                className={`h-5 w-5 ${
-                  inTremorBand ? "text-[var(--tc-alert)]" : "text-[var(--tc-primary)]"
+                className={`h-4 w-4 ${
+                  inTremorBand ? "text-[var(--tc-alert)]" : "text-[var(--tc-primary-ink)]"
                 }`}
                 aria-hidden="true"
               />
             </div>
-            <p className="mt-3 text-4xl font-bold text-[var(--tc-ink)] tabular-nums">
+            <p className="mt-2.5 text-3xl font-semibold tracking-tight text-[var(--tc-ink)] tabular-nums">
               {tremorHz !== null ? tremorHz.toFixed(2) : "0.00"}
-              <span className="ml-1.5 text-lg font-semibold text-[var(--tc-ink-muted)]">Hz</span>
+              <span className="ml-1 text-sm font-normal text-[var(--tc-ink-muted)]">Hz</span>
             </p>
             <p
-              className={`mt-2 text-sm font-semibold ${
-                inTremorBand ? "text-[var(--tc-alert)]" : "text-[var(--tc-ink-muted)]"
+              className={`mt-1.5 text-xs tabular-nums ${
+                inTremorBand
+                  ? "font-semibold text-[var(--tc-alert)]"
+                  : "text-[var(--tc-ink-muted)]"
               }`}
             >
               {inTremorBand
@@ -404,35 +425,40 @@ export function ControlDeck({
             </p>
           </div>
 
-          <div className="rounded-lg border-2 border-[var(--tc-border)] bg-[var(--tc-surface)] p-5">
-            <div className="flex items-center justify-between text-sm font-semibold text-[var(--tc-ink-muted)]">
+          <div className="p-5">
+            <div className="flex items-center justify-between text-xs font-medium text-[var(--tc-ink-muted)]">
               <span>Click &amp; Drag Protection</span>
-              <CheckCircle2 className="h-5 w-5 text-[var(--tc-primary)]" aria-hidden="true" />
+              <CheckCircle2 className="h-4 w-4 text-[var(--tc-primary-ink)]" aria-hidden="true" />
             </div>
-            <p className="mt-3 text-4xl font-bold text-[var(--tc-ink)] tabular-nums">
+            <p className="mt-2.5 text-3xl font-semibold tracking-tight text-[var(--tc-ink)] tabular-nums">
               {dampeningPct}
-              <span className="ml-1 text-lg font-semibold text-[var(--tc-ink-muted)]">%</span>
+              <span className="ml-0.5 text-sm font-normal text-[var(--tc-ink-muted)]">%</span>
             </p>
-            <p className="mt-2 text-sm text-[var(--tc-ink-muted)] tabular-nums">
-              Rescued: <span className="font-bold">{clicksRescued}</span> | Drags:{" "}
-              <span className="font-bold">{dragsPrevented}</span> | Bounces:{" "}
-              <span className="font-bold">{bouncesBlocked}</span>
+            <p className="mt-1.5 text-xs text-[var(--tc-ink-muted)] tabular-nums">
+              Rescued: <span className="font-semibold text-[var(--tc-ink)]">{clicksRescued}</span>{" "}
+              | Drags:{" "}
+              <span className="font-semibold text-[var(--tc-ink)]">{dragsPrevented}</span> |
+              Bounces:{" "}
+              <span className="font-semibold text-[var(--tc-ink)]">{bouncesBlocked}</span>
               {frame?.steadyhand.click_freeze_active ? " | Frozen" : ""}
             </p>
           </div>
 
-          <div className="rounded-lg border-2 border-[var(--tc-border)] bg-[var(--tc-surface)] p-5">
-            <div className="flex items-center justify-between text-sm font-semibold text-[var(--tc-ink-muted)]">
+          <div className="p-5">
+            <div className="flex items-center justify-between text-xs font-medium text-[var(--tc-ink-muted)]">
               <span>Gaze Pointer</span>
-              <Eye className="h-5 w-5 text-[var(--tc-primary)]" aria-hidden="true" />
+              <Eye className="h-4 w-4 text-[var(--tc-primary-ink)]" aria-hidden="true" />
             </div>
-            <p className="mt-3 text-2xl font-bold text-[var(--tc-ink)] tabular-nums">
+            <p className="mt-2.5 text-2xl font-semibold tracking-tight text-[var(--tc-ink)] tabular-nums">
               {frame?.gaze.x !== null && frame?.gaze.x !== undefined
                 ? `${frame.gaze.x}, ${frame.gaze.y}`
                 : "Standby"}
             </p>
-            <p className="mt-3 text-sm text-[var(--tc-ink-muted)]">
-              Source: <span className="font-semibold capitalize">{frame?.gaze.source ?? settings.gaze_source}</span>
+            <p className="mt-2 text-xs text-[var(--tc-ink-muted)]">
+              Source:{" "}
+              <span className="font-medium capitalize text-[var(--tc-ink)]">
+                {frame?.gaze.source ?? settings.gaze_source}
+              </span>
               {" | "}
               {frame?.gaze.face_detected ? "Face locked" : frame?.gaze.status ?? "Idle"}
             </p>
@@ -440,29 +466,29 @@ export function ControlDeck({
         </div>
 
         {gazeActive && (
-          <div className="mt-6 grid grid-cols-1 items-start gap-6 rounded-xl border border-[var(--tc-border)] bg-[var(--tc-surface)] p-5 shadow-[var(--tc-shadow)] lg:grid-cols-12">
+          <div className="cc-card grid grid-cols-1 items-start gap-6 p-5 lg:grid-cols-12">
             <div className="lg:col-span-5">
               <GazePreviewFeed gaze={frame?.gaze} active={gazeActive} />
             </div>
-            <div className="space-y-4 lg:col-span-7">
+            <div className="space-y-3.5 lg:col-span-7">
               <div>
-                <h3 className="text-lg font-bold text-[var(--tc-ink)]">
-                  GazeCam Quick Setup (3 Steps)
+                <h3 className="text-base font-semibold text-[var(--tc-ink)]">
+                  GazeCam Quick Setup
                 </h3>
-                <p className="mt-1 text-sm text-[var(--tc-ink-muted)]">
-                  The head cursor only appears after you calibrate your center and edges.
+                <p className="mt-0.5 text-sm text-[var(--tc-ink-muted)]">
+                  The head cursor activates once you calibrate center and screen edges.
                 </p>
               </div>
 
-              <ol className="space-y-2.5 text-sm">
-                <li className="flex items-center justify-between gap-3 rounded-lg bg-[var(--tc-bg)] px-3.5 py-2.5">
-                  <span className="font-semibold text-[var(--tc-ink)]">
+              <ol className="space-y-2 text-sm">
+                <li className="flex items-center justify-between gap-3 rounded-xl bg-[var(--tc-surface-alt)] px-4 py-3">
+                  <span className="font-medium text-[var(--tc-ink)]">
                     1. Camera &amp; Face Lock
                   </span>
                   <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                       frame?.gaze.face_detected
-                        ? "bg-[var(--tc-mint)] text-[var(--tc-primary)]"
+                        ? "bg-[var(--tc-success-bg)] text-[var(--tc-success)]"
                         : "bg-[var(--tc-alert-bg)] text-[var(--tc-alert)]"
                     }`}
                   >
@@ -470,12 +496,12 @@ export function ControlDeck({
                   </span>
                 </li>
 
-                <li className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-[var(--tc-bg)] px-3.5 py-2.5">
+                <li className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[var(--tc-surface-alt)] px-4 py-3">
                   <div>
-                    <span className="font-semibold text-[var(--tc-ink)]">
-                      2. Calibrate Center, Left, Right, Up &amp; Down
+                    <span className="font-medium text-[var(--tc-ink)]">
+                      2. Calibrate Center &amp; Edges
                     </span>
-                    <span className="ml-2 text-xs font-semibold text-[var(--tc-ink-muted)]">
+                    <span className="ml-2 text-xs text-[var(--tc-ink-muted)]">
                       ({frame?.gaze.calibrated ? "Calibrated" : "Required first"})
                     </span>
                   </div>
@@ -484,7 +510,7 @@ export function ControlDeck({
                       <button
                         type="button"
                         onClick={() => void clearCalibration().catch(() => undefined)}
-                        className="min-h-11 rounded-lg border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-3 text-xs font-bold text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)]"
+                        className="min-h-10 rounded-lg border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-3 text-xs font-semibold text-[var(--tc-ink)]"
                       >
                         Reset
                       </button>
@@ -492,22 +518,20 @@ export function ControlDeck({
                     <button
                       type="button"
                       onClick={onStartCalibration}
-                      className="min-h-11 rounded-lg bg-[var(--tc-primary)] px-4 text-sm font-semibold text-white hover:bg-[var(--tc-primary-hover)]"
+                      className="min-h-10 rounded-lg bg-[var(--tc-primary)] px-3.5 text-xs font-semibold text-white hover:bg-[var(--tc-primary-hover)]"
                     >
                       {frame?.gaze.calibrated ? "Recalibrate" : "Calibrate Now"}
                     </button>
                   </div>
                 </li>
 
-                <li className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-[var(--tc-bg)] px-3.5 py-2.5">
+                <li className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[var(--tc-surface-alt)] px-4 py-3">
                   <div>
-                    <span className="font-semibold text-[var(--tc-ink)]">
+                    <span className="font-medium text-[var(--tc-ink)]">
                       3. Head Cursor &amp; Dwell Click
                     </span>
-                    <span className="ml-2 text-xs font-semibold text-[var(--tc-ink-muted)]">
-                      {frame?.gaze.calibrated
-                        ? "Live in browser"
-                        : "Waiting for Step 2"}
+                    <span className="ml-2 text-xs text-[var(--tc-ink-muted)]">
+                      {frame?.gaze.calibrated ? "Live in app" : "Waiting for calibration"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -515,9 +539,9 @@ export function ControlDeck({
                       type="button"
                       disabled={toggling}
                       onClick={() => void onToggle({ system_mouse: !sysMouseActive })}
-                      className={`min-h-11 rounded-lg border px-3.5 text-xs font-bold transition-colors ${
+                      className={`min-h-10 rounded-lg border px-3 text-xs font-semibold ${
                         sysMouseActive
-                          ? "border-[var(--tc-primary)] bg-[var(--tc-mint)] text-[var(--tc-primary)]"
+                          ? "border-[var(--tc-primary)] bg-[var(--tc-mint)] text-[var(--tc-primary-ink)]"
                           : "border-[var(--tc-border-strong)] bg-[var(--tc-surface)] text-[var(--tc-ink)]"
                       }`}
                     >
@@ -533,7 +557,7 @@ export function ControlDeck({
                           system_mouse: false,
                         })
                       }
-                      className="min-h-11 rounded-lg bg-[var(--tc-alert)] px-3.5 text-xs font-bold text-white hover:bg-[#7F1D1D]"
+                      className="min-h-10 rounded-lg bg-[var(--tc-alert)] px-3 text-xs font-semibold text-white hover:opacity-90"
                     >
                       Stop GazeCam
                     </button>
@@ -544,47 +568,55 @@ export function ControlDeck({
           </div>
         )}
 
-        {/* Real-Time Recharts Trace + Practice Strip */}
-        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div>
+        {/* Real-Time Stability Trace + Isolated Practice Strip */}
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div className="cc-card p-5">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-[var(--tc-ink)]">
+              <h3 className="text-sm font-semibold text-[var(--tc-ink)]">
                 Real-Time Stability Score Trace
               </h3>
-              <span className="text-sm font-semibold text-[var(--tc-ink-muted)] tabular-nums">
-                Tremor Level: {frame?.tremor_severity ?? "minimal"}
+              <span className="text-xs font-medium capitalize text-[var(--tc-ink-muted)] tabular-nums">
+                Level: {frame?.tremor_severity ?? "minimal"}
               </span>
             </div>
-            <div className="h-44 w-full rounded-xl border border-[var(--tc-border)] bg-[var(--tc-surface)] p-3.5 shadow-[var(--tc-shadow)]">
+            <div className="h-44 w-full">
               <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="tcStabilityGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#1D4ED8" stopOpacity={0.28} />
-                      <stop offset="95%" stopColor="#1D4ED8" stopOpacity={0.02} />
+                      <stop offset="5%" stopColor="var(--tc-primary)" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="var(--tc-primary)" stopOpacity={0.02} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid stroke="#E2E8F0" strokeDasharray="3 3" vertical={false} />
-                  <YAxis domain={[0, 100]} width={32} stroke="#42526E" fontSize={12} tickLine={false} axisLine={false} />
-                  <ReferenceLine y={85} stroke="#0F2D59" strokeDasharray="4 4" strokeOpacity={0.45} />
+                  <CartesianGrid stroke="var(--tc-chart-grid)" strokeDasharray="3 3" vertical={false} />
+                  <YAxis
+                    domain={[0, 100]}
+                    width={32}
+                    stroke="var(--tc-chart-axis)"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <ReferenceLine
+                    y={85}
+                    stroke="var(--tc-primary)"
+                    strokeDasharray="4 4"
+                    strokeOpacity={0.45}
+                  />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#0F2D59",
-                      border: "1px solid #1E3A8A",
+                      backgroundColor: "var(--tc-surface)",
+                      border: "1px solid var(--tc-border-strong)",
                       borderRadius: "10px",
-                      color: "#FFFFFF",
-                      fontSize: "13px",
-                      fontWeight: 600,
-                      boxShadow: "0 10px 25px rgba(11, 19, 36, 0.2)",
+                      color: "var(--tc-ink)",
+                      fontSize: "12px",
                     }}
-                    itemStyle={{ color: "#DBEAFE" }}
-                    labelStyle={{ color: "#93C5FD" }}
                   />
                   <Area
                     type="monotone"
                     dataKey="score"
-                    stroke="#1D4ED8"
-                    strokeWidth={2.75}
+                    stroke="var(--tc-primary)"
+                    strokeWidth={2.5}
                     fill="url(#tcStabilityGrad)"
                     isAnimationActive={false}
                   />
@@ -593,21 +625,21 @@ export function ControlDeck({
             </div>
           </div>
 
-          <div>
+          <div className="cc-card p-5">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-[var(--tc-ink)]">
+              <h3 className="text-sm font-semibold text-[var(--tc-ink)]">
                 Live Pointer Practice Strip
               </h3>
-              <span className="text-sm font-semibold text-[var(--tc-ink-muted)] tabular-nums">
+              <span className="font-mono text-xs text-[var(--tc-ink-muted)] tabular-nums">
                 {padCursor ? `Input ${padCursor.x}, ${padCursor.y}` : "Move cursor inside"}
               </span>
             </div>
             <div
               onPointerMove={handlePadPointerMove}
-              className="relative flex h-44 w-full items-center justify-center rounded-lg border-2 border-dashed border-[var(--tc-border-strong)] bg-[var(--tc-surface-alt)] px-4 text-center"
+              className="relative flex h-44 w-full items-center justify-center rounded-xl border border-dashed border-[var(--tc-border-strong)] bg-[var(--tc-surface-alt)] px-5 text-center"
             >
-              <p className="pointer-events-none text-base font-medium text-[var(--tc-ink-muted)]">
-                Move your cursor across this isolated practice area to test One Euro smoothing without affecting OS cursor logs.
+              <p className="pointer-events-none max-w-sm text-sm text-[var(--tc-ink-muted)]">
+                Move your cursor across this isolated practice strip to feel One Euro smoothing without affecting OS cursor logs.
               </p>
             </div>
           </div>

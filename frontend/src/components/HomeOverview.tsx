@@ -1,13 +1,13 @@
 import {
   Activity,
   ArrowRight,
-  Compass,
+  ChevronRight,
   Eye,
+  FileBarChart2,
   Hand,
-  HeartHandshake,
   Magnet,
-  MousePointerClick,
   ShieldCheck,
+  Target,
 } from "lucide-react";
 import { BrandLogo } from "./BrandLogo";
 
@@ -16,106 +16,99 @@ interface HomeOverviewProps {
   onStartStabilizing: () => void;
   onOpenPlayground: () => void;
   onOpenControlDeck: () => void;
+  onOpenClinicianReport?: () => void;
+  activeProfile?: string;
+  stabilityScore?: number | null;
 }
 
-function EditorialIllustration({
-  variant,
-  title,
-  subtitle,
-}: {
-  variant: "workspace" | "caregiver";
-  title: string;
-  subtitle: string;
-}) {
+function TrajectoryIllustration() {
   return (
     <div
       role="img"
-      aria-label={`${title} - ${subtitle}`}
-      className="flex h-full min-h-[240px] w-full flex-col items-center justify-center rounded-xl border-2 border-[var(--tc-border)] bg-[var(--tc-surface)] p-6 text-center shadow-[var(--tc-shadow)]"
+      aria-label="Calm Everyday Desktop Control - Raw 4-12 Hz jitter smoothed cleanly toward target"
+      className="flex h-full min-h-[210px] w-full flex-col justify-between rounded-2xl bg-[var(--tc-surface-alt)] p-5"
     >
-      {variant === "workspace" ? (
-        <svg viewBox="0 0 260 150" className="h-36 w-full max-w-[260px]" aria-hidden="true">
-          <rect x="16" y="14" width="228" height="122" rx="14" fill="#F8FAFC" stroke="#0F2D59" strokeWidth="2.5" />
-          <path d="M36 92 C66 64, 92 108, 124 78 C150 56, 178 96, 222 64" stroke="#9F1239" strokeWidth="2.5" strokeDasharray="5 4" fill="none" />
-          <path d="M36 86 C86 78, 152 72, 222 64" stroke="#1D4ED8" strokeWidth="4" strokeLinecap="round" fill="none" />
-          <circle cx="222" cy="64" r="16" fill="#DBEAFE" stroke="#1D4ED8" strokeWidth="2.5" strokeDasharray="4 3" />
-          <circle cx="222" cy="64" r="7" fill="#0F2D59" />
-          <rect x="36" y="30" width="94" height="12" rx="6" fill="#CBD5E1" />
-          <rect x="36" y="110" width="142" height="10" rx="5" fill="#E2E8F0" />
-        </svg>
-      ) : (
-        <svg viewBox="0 0 260 150" className="h-36 w-full max-w-[260px]" aria-hidden="true">
-          <rect x="16" y="14" width="228" height="122" rx="14" fill="#FFFFFF" stroke="#0F2D59" strokeWidth="2.5" />
-          <rect x="34" y="34" width="90" height="82" rx="10" fill="#EFF6FF" stroke="#1D4ED8" strokeWidth="2" />
-          <path d="M48 92 L68 72 L86 82 L110 56" stroke="#1D4ED8" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-          <rect x="138" y="36" width="86" height="14" rx="5" fill="#0F2D59" />
-          <rect x="138" y="60" width="72" height="10" rx="5" fill="#94A3B8" />
-          <rect x="138" y="78" width="84" height="10" rx="5" fill="#CBD5E1" />
-          <rect x="138" y="98" width="56" height="16" rx="6" fill="#DBEAFE" stroke="#1D4ED8" strokeWidth="1.5" />
-        </svg>
-      )}
-      <p className="mt-3 text-base font-bold text-[var(--tc-ink)]">{title}</p>
-      <p className="mt-0.5 text-sm text-[var(--tc-ink-muted)]">{subtitle}</p>
+      <svg viewBox="0 0 280 132" className="h-32 w-full" aria-hidden="true">
+        <rect
+          x="8"
+          y="8"
+          width="264"
+          height="116"
+          rx="14"
+          fill="var(--tc-surface)"
+          stroke="var(--tc-border)"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M30 84 C54 54, 78 102, 108 72 C136 46, 166 94, 232 58"
+          stroke="var(--tc-alert)"
+          strokeOpacity="0.6"
+          strokeWidth="2.2"
+          strokeDasharray="4 4"
+          fill="none"
+        />
+        <path
+          d="M30 78 C92 70, 160 64, 232 58"
+          stroke="var(--tc-primary)"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          fill="none"
+        />
+        <circle
+          cx="232"
+          cy="58"
+          r="16"
+          fill="var(--tc-mint)"
+          stroke="var(--tc-primary)"
+          strokeWidth="1.75"
+          strokeDasharray="3 3"
+        />
+        <circle cx="232" cy="58" r="6" fill="var(--tc-primary)" />
+        <rect x="28" y="24" width="76" height="8" rx="4" fill="var(--tc-border)" />
+        <rect x="28" y="102" width="128" height="7" rx="3.5" fill="var(--tc-surface-alt)" />
+      </svg>
+      <div className="mt-3 flex items-center justify-between gap-2 text-xs">
+        <span className="font-semibold text-[var(--tc-ink)]">
+          Calm Everyday Desktop Control
+        </span>
+        <span className="text-[var(--tc-ink-muted)]">4-12 Hz Delta Filtering</span>
+      </div>
     </div>
   );
 }
 
-const CHALLENGES = [
+const PROTECTION_ROWS = [
   {
-    title: "Missed Clicks on Tiny Buttons",
-    body: "Even mild hand tremors can push the arrow just off a small toolbar button or checkbox right as you press down.",
-    icon: MousePointerClick,
-    diagram: "hitbox",
-  },
-  {
-    title: "Accidental File Drags & Double-Clicks",
-    body: "Natural finger tremor during a click often looks like a swipe or double-tap to your computer, dragging windows or bouncing clicks by mistake.",
-    icon: ShieldCheck,
-    diagram: "freeze",
-  },
-  {
-    title: "Medication On & Off Changes",
-    body: "Comfort changes throughout the day as medication takes effect or wears off. Rigid mouse settings rarely keep pace.",
-    icon: Activity,
-    diagram: "preset",
-  },
-];
-
-const SOLUTIONS = [
-  {
-    title: "Smart Tremor Smoothing",
-    body: "Filters fast 4-12 Hz involuntary hand shaking (Parkinsonian & essential tremor) in delta space while preserving natural intentional movements.",
+    title: "Delta-Space Tremor Smoothing",
+    detail: "Dampens 4-12 Hz hand shaking while preserving full intentional pointer travel across monitors.",
     icon: Hand,
   },
   {
-    title: "Gentle Button Magnetism & Bounce Guard",
-    body: "Silently widens everyday button boundaries, steadies clicks for 180ms, blocks tremor double-clicks, and dampens scroll jitter.",
-    icon: Magnet,
+    title: "Click-Freeze & Bounce Guard",
+    detail: "Holds the pointer steady during clicks, blocks tremor double-clicks, and filters accidental file drags.",
+    icon: ShieldCheck,
   },
   {
-    title: "Hands-Free Gaze & Physician Reports",
-    body: "Switch to webcam head/eye pointing anytime, and export longitudinal tremor spectra and medication logs for your neurologist.",
-    icon: Eye,
+    title: "Async Button Magnetism",
+    detail: "Gently expands small toolbar hitboxes via native Accessibility trees without adding cursor lag.",
+    icon: Magnet,
   },
 ];
 
-const STEPS = [
+const CLINICAL_ROWS = [
   {
-    step: "Step 1",
-    title: "Pick your comfort preset",
-    body: "Choose Mild, Moderate, High stabilization, or Hands-Free mode with one large tap. No technical setup required.",
-    icon: Compass,
+    title: "Functional Motor Telemetry",
+    detail: "Tracks 4-6 Hz resting vs. 6-12 Hz action bands, physical RMS amplitude (mm), and honest hourly coverage.",
+    icon: Activity,
   },
   {
-    step: "Step 2",
-    title: "Move naturally in any app",
-    body: "ClearCursor runs quietly in your menu bar or system tray so browsers, email, and documents all feel calm and forgiving.",
-    icon: HeartHandshake,
+    title: "15-Second Guided Check-Ins & Diary",
+    detail: "Pair quick standardized hold-and-tap tests with medication doses to spot ON/OFF patterns clearly.",
+    icon: FileBarChart2,
   },
   {
-    step: "Step 3",
-    title: "Bypass or toggle anytime",
-    body: "Hold Alt/Option for momentary precision bypass, press Command/Ctrl+Shift+S to pause, or export reports before clinic visits.",
+    title: "Hands-Free Gaze Mode",
+    detail: "Switch to webcam head or eye pointing with dwell and blink clicking whenever your hands need rest.",
     icon: Eye,
   },
 ];
@@ -125,202 +118,198 @@ export function HomeOverview({
   onStartStabilizing,
   onOpenPlayground,
   onOpenControlDeck,
+  onOpenClinicianReport,
+  activeProfile = "moderate",
+  stabilityScore = null,
 }: HomeOverviewProps) {
   return (
-    <div className="space-y-12">
-      {/* Hero Banner */}
-      <section className="grid grid-cols-1 items-center gap-8 border-b-2 border-[var(--tc-border)] pb-10 lg:grid-cols-12">
-        <div className="space-y-5 lg:col-span-7">
-          <div className="flex items-center gap-4">
-            <BrandLogo className="h-14 w-14 shrink-0" />
-            <span className="text-lg font-bold text-[var(--tc-primary)]">
-              ClearCursor Assistive Desktop
-            </span>
-          </div>
-
-          <h2 className="text-3xl font-bold tracking-tight text-[var(--tc-ink)] sm:text-4xl">
-            Steadier clicks and calmer computing for trembling hands.
-          </h2>
-
-          <p className="max-w-2xl text-lg leading-relaxed text-[var(--tc-ink-muted)]">
-            ClearCursor works silently alongside every app on macOS and Windows to smooth 4-12 Hz tremors, block accidental double-clicks and drags, magnetize small buttons, and log objective tremor telemetry for your clinician.
-          </p>
-
-          <div className="flex flex-wrap items-center gap-4 pt-2">
-            <button
-              type="button"
-              onClick={onStartStabilizing}
-              className="inline-flex min-h-14 items-center gap-3 rounded-xl bg-[var(--tc-primary)] px-7 text-lg font-semibold text-white shadow-sm transition-colors hover:bg-[var(--tc-primary-hover)]"
-            >
-              <span>{stabilizationActive ? "Open Control Deck" : "Start Stabilizing"}</span>
-              <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />
-            </button>
-
-            <button
-              type="button"
-              onClick={onOpenPlayground}
-              className="inline-flex min-h-14 items-center gap-3 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-6 text-base font-semibold text-[var(--tc-ink)] shadow-sm transition-colors hover:bg-[var(--tc-mint)]"
-            >
-              <span>Try Sandbox Playground</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="lg:col-span-5">
-          <EditorialIllustration
-            variant="workspace"
-            title="Calm Everyday Desktop Control"
-            subtitle="100% local delta-space tremor filtering across every app"
-          />
-        </div>
-      </section>
-
-      {/* Who It's For */}
-      <section className="grid grid-cols-1 items-center gap-8 rounded-xl border border-[var(--tc-border)] bg-[var(--tc-mint)] p-6 shadow-[var(--tc-shadow)] lg:grid-cols-12 lg:p-8">
-        <div className="lg:col-span-5">
-          <EditorialIllustration
-            variant="caregiver"
-            title="Built for Patients, Caregivers & Clinicians"
-            subtitle="Objective motor logs paired with medication timing"
-          />
-        </div>
-
-        <div className="space-y-4 lg:col-span-7">
-          <h2 className="text-2xl font-bold text-[var(--tc-ink)]">
-            Built for people living with Parkinson&apos;s, essential tremor, and their caregivers
-          </h2>
-          <p className="text-base leading-relaxed text-[var(--tc-ink)]">
-            Modern websites and desktop apps pack dozens of tiny icons, close buttons, and links close together. You should not have to fight your mouse or miss important health portals just because your hands are shaking.
-          </p>
-          <p className="text-base leading-relaxed text-[var(--tc-ink-muted)]">
-            Everything in ClearCursor runs locally on your computer with zero cloud uploads. Caregivers can set presets once, log medication times, and export neurologist-ready PDFs directly from SQLite.
-          </p>
-          <div className="pt-2">
-            <button
-              type="button"
-              onClick={onOpenControlDeck}
-              className="inline-flex min-h-14 items-center gap-3 rounded-lg border-2 border-[var(--tc-primary)] bg-[var(--tc-surface)] px-6 text-base font-bold text-[var(--tc-primary)] hover:bg-[var(--tc-surface-alt)]"
-            >
-              <span>Choose Your Comfort Preset</span>
-              <ArrowRight className="h-5 w-5 shrink-0" aria-hidden="true" />
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* The Daily Challenges We Solve */}
-      <section aria-labelledby="challenges-heading" className="space-y-6">
-        <div>
-          <h2 id="challenges-heading" className="text-2xl font-bold text-[var(--tc-ink)]">
-            The Daily Challenges We Solve
-          </h2>
-          <p className="mt-1 text-base text-[var(--tc-ink-muted)]">
-            Why standard pointers feel exhausting when living with motor tremors.
-          </p>
-        </div>
-
-        <div className="divide-y-2 divide-[var(--tc-border)] border-y-2 border-[var(--tc-border)]">
-          {CHALLENGES.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={item.title}
-                className="grid grid-cols-1 items-center gap-6 py-5 md:grid-cols-12"
-              >
-                <div className="flex items-start gap-4 md:col-span-8">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-[var(--tc-alert-bg)] text-[var(--tc-alert)]">
-                    <Icon className="h-6 w-6" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-[var(--tc-ink)]">{item.title}</h3>
-                    <p className="mt-1 text-base text-[var(--tc-ink-muted)]">{item.body}</p>
-                  </div>
-                </div>
-
-                <div className="rounded-xl border border-[var(--tc-border)] bg-[var(--tc-surface)] p-3 shadow-xs md:col-span-4">
-                  <svg viewBox="0 0 220 56" className="h-12 w-full" aria-hidden="true">
-                    {item.diagram === "hitbox" ? (
-                      <>
-                        <rect x="64" y="10" width="92" height="36" rx="6" fill="#DBEAFE" stroke="#1D4ED8" strokeWidth="1.5" strokeDasharray="5 3" />
-                        <rect x="82" y="18" width="56" height="20" rx="4" fill="#0F2D59" />
-                        <circle cx="72" cy="28" r="6" fill="none" stroke="#9F1239" strokeWidth="2.5" />
-                        <circle cx="96" cy="28" r="5" fill="#1D4ED8" />
-                      </>
-                    ) : item.diagram === "freeze" ? (
-                      <>
-                        <circle cx="52" cy="28" r="14" fill="#DBEAFE" stroke="#1D4ED8" strokeWidth="2" />
-                        <circle cx="52" cy="28" r="5" fill="#0F2D59" />
-                        <path d="M72 28C96 14 114 42 140 28" stroke="#9F1239" strokeWidth="2.5" fill="none" strokeDasharray="4 3" />
-                        <rect x="148" y="16" width="54" height="24" rx="4" fill="#0F2D59" />
-                      </>
-                    ) : (
-                      <>
-                        <path d="M16 38Q52 16 88 30T156 20T204 28" stroke="#1D4ED8" strokeWidth="3" fill="none" />
-                        <circle cx="88" cy="30" r="5" fill="#0F2D59" />
-                        <circle cx="156" cy="20" r="5" fill="#9F1239" />
-                      </>
-                    )}
-                  </svg>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* How Our App Solves It */}
-      <section aria-labelledby="solutions-heading" className="space-y-6">
-        <div>
-          <h2 id="solutions-heading" className="text-2xl font-bold text-[var(--tc-ink)]">
-            How ClearCursor Helps in Real Time
-          </h2>
-          <p className="mt-1 text-base text-[var(--tc-ink-muted)]">
-            Calm, assistive technology working quietly beneath your normal mouse or trackpad.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3 md:divide-x-2 md:divide-[var(--tc-border)]">
-          {SOLUTIONS.map((item, idx) => {
-            const Icon = item.icon;
-            return (
-              <div key={item.title} className={idx > 0 ? "md:pl-8" : ""}>
-                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-md bg-[var(--tc-mint)] text-[var(--tc-primary)]">
-                  <Icon className="h-6 w-6" aria-hidden="true" />
-                </div>
-                <h3 className="text-xl font-bold text-[var(--tc-ink)]">{item.title}</h3>
-                <p className="mt-2 text-base text-[var(--tc-ink-muted)]">{item.body}</p>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* How to Use (3 Easy Steps) */}
-      <section aria-labelledby="steps-heading" className="border-t-2 border-[var(--tc-border)] pt-8">
-        <h2 id="steps-heading" className="text-2xl font-bold text-[var(--tc-ink)]">
-          How to Use in 3 Easy Steps
-        </h2>
-
-        <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
-          {STEPS.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={item.step}
-                className="border-t-2 border-[var(--tc-primary)] pt-4"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold uppercase tracking-wide text-[var(--tc-primary)]">
-                    {item.step}
+    <div className="space-y-6">
+      {/* Apple Health Style Summary Hero */}
+      <section className="cc-card p-6 sm:p-7">
+        <div className="grid grid-cols-1 items-center gap-7 lg:grid-cols-12">
+          <div className="space-y-4 lg:col-span-7">
+            <div className="flex flex-wrap items-center gap-3">
+              <BrandLogo className="h-10 w-10 shrink-0 rounded-xl" />
+              <div>
+                <p className="text-sm font-semibold text-[var(--tc-primary-ink)]">
+                  ClearCursor Assistive Desktop
+                </p>
+                <div className="mt-0.5 flex items-center gap-2 text-xs text-[var(--tc-ink-muted)]">
+                  <span
+                    className={`inline-flex items-center gap-1.5 font-medium ${
+                      stabilizationActive
+                        ? "text-[var(--tc-success)]"
+                        : "text-[var(--tc-ink-muted)]"
+                    }`}
+                  >
+                    <span
+                      className={`h-2 w-2 rounded-full ${
+                        stabilizationActive
+                          ? "bg-[var(--tc-success)]"
+                          : "bg-[var(--tc-border-strong)]"
+                      }`}
+                      aria-hidden="true"
+                    />
+                    {stabilizationActive ? "Stabilization Active" : "Stabilization Paused"}
                   </span>
-                  <Icon className="h-5 w-5 text-[var(--tc-primary)]" aria-hidden="true" />
+                  <span>|</span>
+                  <span className="capitalize">Preset: {activeProfile}</span>
+                  {stabilityScore !== null && (
+                    <>
+                      <span>|</span>
+                      <span className="tabular-nums font-medium text-[var(--tc-ink)]">
+                        Stability {stabilityScore.toFixed(0)}/100
+                      </span>
+                    </>
+                  )}
                 </div>
-                <h3 className="mt-3 text-xl font-bold text-[var(--tc-ink)]">{item.title}</h3>
-                <p className="mt-2 text-base text-[var(--tc-ink-muted)]">{item.body}</p>
               </div>
-            );
-          })}
+            </div>
+
+            <h1 className="text-2xl font-semibold tracking-tight text-[var(--tc-ink)] sm:text-3xl">
+              Steadier clicks and calmer computing for trembling hands.
+            </h1>
+
+            <p className="max-w-2xl text-base leading-relaxed text-[var(--tc-ink-muted)]">
+              ClearCursor runs quietly alongside every desktop app to smooth 4-12 Hz tremor, stop accidental drags and double-clicks, magnetize small buttons, and compile objective motor reports for your clinician.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <button
+                type="button"
+                onClick={onStartStabilizing}
+                className="inline-flex min-h-12 items-center gap-2.5 rounded-xl bg-[var(--tc-primary)] px-5 text-sm font-semibold text-white transition-colors hover:bg-[var(--tc-primary-hover)]"
+              >
+                <span>{stabilizationActive ? "Open Control Deck" : "Start Stabilizing"}</span>
+                <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
+              </button>
+
+              <button
+                type="button"
+                onClick={onOpenPlayground}
+                className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-5 text-sm font-semibold text-[var(--tc-ink)] transition-colors hover:bg-[var(--tc-surface-alt)]"
+              >
+                <Target className="h-4 w-4 shrink-0 text-[var(--tc-primary-ink)]" aria-hidden="true" />
+                <span>Try Sandbox Playground</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="lg:col-span-5">
+            <TrajectoryIllustration />
+          </div>
         </div>
+      </section>
+
+      {/* Quick Destinations Strip */}
+      <section aria-label="Quick workspace actions" className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <button
+          type="button"
+          onClick={onOpenControlDeck}
+          className="cc-card flex min-h-16 items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-[var(--tc-surface-alt)]"
+        >
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-[var(--tc-ink)]">Live Control Deck</p>
+            <p className="mt-0.5 truncate text-xs text-[var(--tc-ink-muted)]">
+              Switch presets, OS hook &amp; live telemetry
+            </p>
+          </div>
+          <ChevronRight className="h-4 w-4 shrink-0 text-[var(--tc-ink-muted)]" aria-hidden="true" />
+        </button>
+
+        <button
+          type="button"
+          onClick={onOpenPlayground}
+          className="cc-card flex min-h-16 items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-[var(--tc-surface-alt)]"
+        >
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-[var(--tc-ink)]">Practice Sandbox</p>
+            <p className="mt-0.5 truncate text-xs text-[var(--tc-ink-muted)]">
+              Compare raw vs. stabilized clicking safely
+            </p>
+          </div>
+          <ChevronRight className="h-4 w-4 shrink-0 text-[var(--tc-ink-muted)]" aria-hidden="true" />
+        </button>
+
+        <button
+          type="button"
+          onClick={onOpenClinicianReport ?? onOpenControlDeck}
+          className="cc-card flex min-h-16 items-center justify-between gap-3 px-5 py-4 text-left transition-colors hover:bg-[var(--tc-surface-alt)]"
+        >
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-[var(--tc-ink)]">Clinician Report &amp; Check-In</p>
+            <p className="mt-0.5 truncate text-xs text-[var(--tc-ink-muted)]">
+              15-sec motor check, diary &amp; PDF export
+            </p>
+          </div>
+          <ChevronRight className="h-4 w-4 shrink-0 text-[var(--tc-ink-muted)]" aria-hidden="true" />
+        </button>
+      </section>
+
+      {/* Apple Health Grouped List Sections (No Nested Cards) */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <section aria-labelledby="protection-heading" className="cc-card overflow-hidden">
+          <div className="border-b border-[var(--tc-border)] px-5 py-4">
+            <h2 id="protection-heading" className="text-base font-semibold text-[var(--tc-ink)]">
+              Everyday Pointer Protection
+            </h2>
+          </div>
+          <ul className="divide-y divide-[var(--tc-border)]">
+            {PROTECTION_ROWS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <li key={item.title} className="flex items-start gap-3.5 px-5 py-4">
+                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--tc-mint)] text-[var(--tc-primary-ink)]">
+                    <Icon className="h-4 w-4" aria-hidden="true" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-[var(--tc-ink)]">{item.title}</p>
+                    <p className="mt-0.5 text-sm leading-relaxed text-[var(--tc-ink-muted)]">
+                      {item.detail}
+                    </p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+
+        <section aria-labelledby="clinical-heading" className="cc-card overflow-hidden">
+          <div className="border-b border-[var(--tc-border)] px-5 py-4">
+            <h2 id="clinical-heading" className="text-base font-semibold text-[var(--tc-ink)]">
+              Clinical Telemetry &amp; Hands-Free Control
+            </h2>
+          </div>
+          <ul className="divide-y divide-[var(--tc-border)]">
+            {CLINICAL_ROWS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <li key={item.title} className="flex items-start gap-3.5 px-5 py-4">
+                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--tc-mint)] text-[var(--tc-primary-ink)]">
+                    <Icon className="h-4 w-4" aria-hidden="true" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-[var(--tc-ink)]">{item.title}</p>
+                    <p className="mt-0.5 text-sm leading-relaxed text-[var(--tc-ink-muted)]">
+                      {item.detail}
+                    </p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      </div>
+
+      {/* Shortcuts & Privacy Footer Strip */}
+      <section className="cc-card flex flex-wrap items-center justify-between gap-4 px-5 py-4 text-sm text-[var(--tc-ink-muted)]">
+        <p>
+          Hold <kbd className="rounded-md bg-[var(--tc-surface-alt)] px-2 py-0.5 font-mono text-xs font-semibold text-[var(--tc-ink)]">Alt / Option</kbd> for momentary bypass, or press{" "}
+          <kbd className="rounded-md bg-[var(--tc-surface-alt)] px-2 py-0.5 font-mono text-xs font-semibold text-[var(--tc-ink)]">Cmd/Ctrl+Shift+S</kbd> anytime to pause stabilization.
+        </p>
+        <span className="text-xs font-medium text-[var(--tc-ink-muted)]">
+          100% local SQLite storage. No cloud telemetry.
+        </span>
       </section>
     </div>
   );

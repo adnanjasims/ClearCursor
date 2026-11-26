@@ -33,6 +33,7 @@ export interface SettingsPayload {
   global_shortcut: string;
   resume_stabilization_on_launch: boolean;
   minimize_to_tray: boolean;
+  keyboard_cadence_telemetry?: boolean;
   system_mouse: boolean;
   gaze_source: GazeSource;
   gaze_dwell_ms: number;
@@ -237,11 +238,90 @@ export interface HourlyProfilePoint {
   hour: number;
   label: string;
   sample_count: number;
-  avg_stability_score: number;
-  avg_tremor_index: number;
-  avg_resting_band_pct: number;
-  avg_action_band_pct: number;
-  avg_rms_amplitude_mm: number;
+  active_minutes?: number;
+  has_data?: boolean;
+  avg_stability_score: number | null;
+  avg_tremor_index: number | null;
+  avg_resting_band_pct: number | null;
+  avg_action_band_pct: number | null;
+  avg_rms_amplitude_mm: number | null;
+}
+
+export interface CoverageSummary {
+  telemetry_scope: string;
+  scope_description: string;
+  window_days: number;
+  active_days: number;
+  active_hours_of_day: number;
+  total_active_minutes: number;
+  checkin_count: number;
+  keyboard_cadence_windows: number;
+}
+
+export type MotorCheckinContext =
+  | "routine"
+  | "baseline"
+  | "pre_medication"
+  | "post_medication"
+  | "flare";
+
+export interface MotorCheckinRecord {
+  id: number;
+  session_id: string;
+  timestamp: number;
+  context_tag: MotorCheckinContext | string;
+  duration_sec: number;
+  overall_score: number;
+  hold_stability_score: number;
+  hold_rms_px: number;
+  hold_rms_mm: number;
+  hold_dominant_hz: number | null;
+  hold_resting_band_pct: number;
+  hold_action_band_pct: number;
+  hold_tremor_index: number;
+  tap_count: number;
+  tap_accuracy_pct: number | null;
+  tap_mean_error_px: number | null;
+  tap_mean_reaction_ms: number | null;
+  notes: string;
+}
+
+export interface MotorCheckinCreateRequest {
+  hold_samples: { x: number; y: number; t: number }[];
+  target_x: number;
+  target_y: number;
+  taps: {
+    target_x: number;
+    target_y: number;
+    click_x: number;
+    click_y: number;
+    reaction_ms?: number | null;
+  }[];
+  tap_hit_radius_px?: number;
+  context_tag?: MotorCheckinContext;
+  notes?: string;
+}
+
+export interface KeyboardCadenceSummary {
+  window_count: number;
+  total_keystrokes: number;
+  avg_hold_ms: number;
+  avg_flight_ms: number;
+  avg_cadence_kpm: number;
+  avg_regularity_score: number;
+}
+
+export interface KeyboardCadenceWindow {
+  id: number;
+  session_id: string;
+  timestamp: number;
+  sample_count: number;
+  mean_hold_ms: number;
+  std_hold_ms: number;
+  mean_flight_ms: number;
+  std_flight_ms: number;
+  typing_cadence_kpm: number;
+  rhythm_regularity_score: number;
 }
 
 export interface FunctionalSummary {
@@ -288,8 +368,13 @@ export interface SessionsResponse {
   sessions: SessionSummary[];
   daily_trends: DailyTrendPoint[];
   hourly_profile?: HourlyProfilePoint[];
+  hourly_grid?: HourlyProfilePoint[];
+  coverage_summary?: CoverageSummary;
   functional_summary?: FunctionalSummary;
   clinical_events?: ClinicalEventRecord[];
+  motor_checkins?: MotorCheckinRecord[];
+  keyboard_cadence_summary?: KeyboardCadenceSummary;
+  keyboard_cadence_windows?: KeyboardCadenceWindow[];
   simulated_sample_count?: number;
   calibration_profiles: CalibrationProfileSummary[];
 }

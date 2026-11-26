@@ -7,6 +7,10 @@ import type {
   EngineToggleRequest,
   EngineToggleResponse,
   HealthResponse,
+  KeyboardCadenceSummary,
+  KeyboardCadenceWindow,
+  MotorCheckinCreateRequest,
+  MotorCheckinRecord,
   SessionsResponse,
   SettingsPayload,
   SettingsUpdate,
@@ -162,4 +166,30 @@ export function promptSystemPermissions(
 
 export function fetchDisplays(): Promise<DisplaysResponse> {
   return request<DisplaysResponse>("/api/system/displays");
+}
+
+export function createMotorCheckin(
+  payload: MotorCheckinCreateRequest
+): Promise<MotorCheckinRecord> {
+  return request<MotorCheckinRecord>("/api/checkins", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteMotorCheckin(
+  checkinId: number
+): Promise<{ deleted: boolean; id: number }> {
+  return request<{ deleted: boolean; id: number }>(
+    `/api/checkins/${encodeURIComponent(checkinId)}`,
+    { method: "DELETE" }
+  );
+}
+
+export function fetchKeyboardCadence(days = 14): Promise<{
+  enabled: boolean;
+  summary: KeyboardCadenceSummary;
+  windows: KeyboardCadenceWindow[];
+}> {
+  return request(`/api/cadence?days=${encodeURIComponent(days)}`);
 }
