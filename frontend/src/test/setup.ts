@@ -19,6 +19,39 @@ if (!("ResizeObserver" in globalThis)) {
   });
 }
 
+// Ensure a full Web Storage implementation in jsdom even when Node injects a partial localStorage stub
+if (
+  typeof window !== "undefined" &&
+  (!window.localStorage || typeof window.localStorage.clear !== "function")
+) {
+  const store = new Map<string, string>();
+  const memoryStorage: Storage = {
+    get length() {
+      return store.size;
+    },
+    clear() {
+      store.clear();
+    },
+    getItem(key: string) {
+      return store.has(key) ? store.get(key)! : null;
+    },
+    key(index: number) {
+      return Array.from(store.keys())[index] ?? null;
+    },
+    removeItem(key: string) {
+      store.delete(key);
+    },
+    setItem(key: string, value: string) {
+      store.set(String(key), String(value));
+    },
+  };
+  Object.defineProperty(window, "localStorage", {
+    value: memoryStorage,
+    configurable: true,
+    writable: true,
+  });
+}
+
 // Stub minimal 2D canvas context so Canvas & Recharts components render cleanly under jsdom
 HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
   clearRect: vi.fn(),

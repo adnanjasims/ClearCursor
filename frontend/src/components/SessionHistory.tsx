@@ -609,65 +609,70 @@ export function SessionHistory() {
     diurnalGrid.reduce((acc, h) => acc + (h.active_minutes ?? 0), 0);
 
   return (
-    <div className="space-y-6">
-      {/* Header & Exports */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold text-[var(--tc-ink)]">
-            Clinician Motor Report &amp; Medication Diary
+    <div className="space-y-10">
+      {/* Editorial Clinician Header + Photo */}
+      <section className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12">
+        <div className="space-y-4 lg:col-span-7">
+          <h2 className="text-[20px] font-semibold text-[var(--tc-ink)]">
+            Objective Motor Progress &amp; Medication Diary
           </h2>
-          <p className="mt-0.5 text-sm text-[var(--tc-ink-muted)]">
-            Functional computer-use motor telemetry, standardized 15-second check-ins, diurnal coverage, and PDF/CSV exports.
+          <p className="text-[15.5px] leading-relaxed text-[var(--tc-ink-muted)]">
+            Review functional computer-use stability alongside 15-second check-ins and medication times, then export a clean PDF for your neurologist or occupational therapist.
           </p>
+
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <button
+              type="button"
+              onClick={exportClinicianPdf}
+              className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-[var(--tc-primary)] px-5 text-[15px] font-semibold text-white transition-colors hover:bg-[var(--tc-primary-hover)]"
+            >
+              <FileDown className="h-4 w-4" aria-hidden="true" />
+              <span>Export Clinician Report (PDF)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={exportClinicianCsv}
+              className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-4 text-[14.5px] font-medium text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)]"
+            >
+              <FileSpreadsheet className="h-4 w-4 text-[var(--tc-ink-muted)]" aria-hidden="true" />
+              <span>Export CSV Data</span>
+            </button>
+
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => void load()}
+              className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-[var(--tc-border)] bg-[var(--tc-surface)] px-4 text-[14.5px] font-medium text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)] disabled:opacity-50"
+            >
+              <RefreshCw className="h-4 w-4" aria-hidden="true" />
+              <span>{loading ? "Refreshing..." : "Refresh"}</span>
+            </button>
+          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <button
-            type="button"
-            onClick={exportClinicianPdf}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--tc-primary)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--tc-primary-hover)]"
-          >
-            <FileDown className="h-4 w-4" aria-hidden="true" />
-            <span>Export Clinician Report (PDF)</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={exportClinicianCsv}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-4 text-sm font-semibold text-[var(--tc-ink)] transition-colors hover:bg-[var(--tc-surface-alt)]"
-          >
-            <FileSpreadsheet className="h-4 w-4 text-[var(--tc-primary-ink)]" aria-hidden="true" />
-            <span>Export CSV Data</span>
-          </button>
-
-          <button
-            type="button"
-            disabled={loading}
-            onClick={() => void load()}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--tc-border)] bg-[var(--tc-surface)] px-3.5 text-sm font-medium text-[var(--tc-ink)] transition-colors hover:bg-[var(--tc-surface-alt)] disabled:opacity-50"
-          >
-            <RefreshCw className="h-4 w-4" aria-hidden="true" />
-            <span>{loading ? "Refreshing..." : "Refresh"}</span>
-          </button>
+        <div className="overflow-hidden rounded-2xl border border-[var(--tc-border)] lg:col-span-5">
+          <img
+            src="/media/clinician-report.webp"
+            alt="Doctor and patient reviewing a printed motor progress report together"
+            className="aspect-[16/9] w-full object-cover"
+          />
         </div>
-      </div>
+      </section>
 
-      {/* Date Window Selector & Simulation Filter */}
-      <div className="cc-card flex flex-wrap items-center justify-between gap-4 px-5 py-3.5">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-2 text-xs font-semibold text-[var(--tc-ink-muted)]">
-            Report Window:
-          </span>
+      {/* Date Window & Demo Data Filter */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--tc-border)] pt-6">
+        <div role="group" aria-label="Report window" className="flex flex-wrap gap-2">
           {DATE_WINDOWS.map((w) => (
             <button
               key={w.days}
               type="button"
               aria-pressed={days === w.days}
               onClick={() => setDays(w.days)}
-              className={`min-h-9 rounded-lg px-3 text-xs font-semibold transition-colors ${
+              className={`min-h-11 rounded-xl px-4 text-[14.5px] font-medium transition-colors ${
                 days === w.days
                   ? "bg-[var(--tc-primary)] text-white"
-                  : "bg-[var(--tc-surface-alt)] text-[var(--tc-ink)] hover:bg-[var(--tc-mint)]"
+                  : "bg-[var(--tc-surface)] text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)]"
               }`}
             >
               {w.label}
@@ -675,7 +680,7 @@ export function SessionHistory() {
           ))}
         </div>
 
-        <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-medium text-[var(--tc-ink)]">
+        <label className="inline-flex min-h-11 cursor-pointer items-center gap-2.5 text-[14.5px] text-[var(--tc-ink-muted)]">
           <input
             type="checkbox"
             checked={includeSimulated}
@@ -694,116 +699,136 @@ export function SessionHistory() {
       {error && (
         <div
           role="alert"
-          className="rounded-2xl bg-[var(--tc-alert-bg)] px-5 py-4 text-sm font-medium text-[var(--tc-alert)]"
+          className="rounded-2xl bg-[var(--tc-alert-bg)] px-5 py-4 text-[14.5px] font-medium text-[var(--tc-alert)]"
         >
           {error}
         </div>
       )}
 
-      {/* Honest Coverage & Scope Summary (Point 1) */}
-      <section aria-labelledby="coverage-heading" className="cc-card p-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+      {/* Honest Coverage & Visual 24-Hour Activity Strip (Flat layout — zero nested cards) */}
+      <section aria-labelledby="coverage-heading" className="space-y-6 border-t border-[var(--tc-border)] pt-8">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-2.5">
-            <Clock className="mt-0.5 h-4 w-4 shrink-0 text-[var(--tc-primary-ink)]" aria-hidden="true" />
+            <Clock className="mt-1 h-5 w-5 shrink-0 text-[var(--tc-primary)]" aria-hidden="true" />
             <div>
-              <h3 id="coverage-heading" className="text-sm font-semibold text-[var(--tc-ink)]">
+              <h3 id="coverage-heading" className="text-[18px] font-semibold text-[var(--tc-ink)]">
                 Functional Computer-Use Telemetry Coverage
               </h3>
-              <p className="mt-0.5 max-w-3xl text-xs leading-relaxed text-[var(--tc-ink-muted)]">
+              <p className="mt-1 max-w-2xl text-[14.5px] leading-relaxed text-[var(--tc-ink-muted)]">
                 {coverage?.scope_description ??
-                  "Passive functional motor telemetry captured during active pointer use, complemented by standardized 15-second motor check-ins and medication logs. Empty hours mark periods away from the computer rather than zero tremor."}
+                  "Passive motor telemetry captured during active pointer use, paired with standardized 15-second check-ins and medication logs. Blank hours indicate time away from the computer."}
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 text-xs tabular-nums">
-            <span className="rounded-lg bg-[var(--tc-surface-alt)] px-3 py-1.5 font-semibold text-[var(--tc-ink)]">
+
+          <div className="flex flex-wrap gap-4 text-[14.5px] tabular-nums">
+            <span className="font-semibold text-[var(--tc-ink)]">
               {coverage?.active_days ?? trends.length} / {days} active days
             </span>
-            <span className="rounded-lg bg-[var(--tc-surface-alt)] px-3 py-1.5 font-semibold text-[var(--tc-ink)]">
+            <span className="text-[var(--tc-ink-muted)]">
               {activeMinutesCount} active min ({activeHoursCount}/24 hrs covered)
             </span>
-            <span className="rounded-lg bg-[var(--tc-mint)] px-3 py-1.5 font-semibold text-[var(--tc-primary-ink)]">
-              {checkins.length} guided check-ins
-            </span>
+          </div>
+        </div>
+
+        <div aria-label="24-hour recording coverage strip">
+          <div className="grid grid-cols-[repeat(24,minmax(0,1fr))] gap-1.5">
+            {diurnalGrid.map((slot) => (
+              <div
+                key={slot.hour}
+                title={
+                  slot.has_data
+                    ? `${slot.label}: ${slot.active_minutes ?? 0} active min, ${slot.sample_count} windows`
+                    : `${slot.label}: No computer activity recorded`
+                }
+                className={`h-3.5 rounded-sm ${
+                  slot.has_data ? "bg-[var(--tc-teal)]" : "bg-[var(--tc-surface-alt)]"
+                }`}
+              />
+            ))}
+          </div>
+          <div className="mt-1.5 flex justify-between font-mono text-[13px] text-[var(--tc-ink-muted)]">
+            <span>00:00</span>
+            <span>06:00</span>
+            <span>12:00</span>
+            <span>18:00</span>
+            <span>23:00</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6 pt-2 md:grid-cols-4">
+          <div>
+            <p className="text-[14px] text-[var(--tc-ink-muted)]">Mean RMS Amplitude</p>
+            <p className="mt-1 text-[26px] font-semibold text-[var(--tc-ink)] tabular-nums">
+              {meanRmsMm.toFixed(2)} mm
+            </p>
+          </div>
+          <div>
+            <p className="text-[14px] text-[var(--tc-ink-muted)]">Slip-Clicks Rescued</p>
+            <p className="mt-1 text-[26px] font-semibold text-[var(--tc-ink)] tabular-nums">
+              {functional?.total_click_rescues ?? 0}
+            </p>
+          </div>
+          <div>
+            <p className="text-[14px] text-[var(--tc-ink-muted)]">Accidental Drags Blocked</p>
+            <p className="mt-1 text-[26px] font-semibold text-[var(--tc-ink)] tabular-nums">
+              {functional?.total_drags_prevented ?? 0}
+            </p>
+          </div>
+          <div>
+            <p className="text-[14px] text-[var(--tc-ink-muted)]">Double-Click Bounces Stopped</p>
+            <p className="mt-1 text-[26px] font-semibold text-[var(--tc-ink)] tabular-nums">
+              {functional?.total_bounces_blocked ?? 0}
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Functional Protection Summary Strip */}
-      <div className="cc-card grid grid-cols-2 divide-y divide-[var(--tc-border)] md:grid-cols-4 md:divide-x md:divide-y-0">
-        <div className="p-5">
-          <p className="text-xs font-medium text-[var(--tc-ink-muted)]">Mean RMS Amplitude</p>
-          <p className="mt-1.5 text-2xl font-semibold text-[var(--tc-ink)] tabular-nums">
-            {meanRmsMm.toFixed(2)} mm
-          </p>
-        </div>
-        <div className="p-5">
-          <p className="text-xs font-medium text-[var(--tc-ink-muted)]">Slip-Clicks Rescued</p>
-          <p className="mt-1.5 text-2xl font-semibold text-[var(--tc-primary-ink)] tabular-nums">
-            {functional?.total_click_rescues ?? 0}
-          </p>
-        </div>
-        <div className="p-5">
-          <p className="text-xs font-medium text-[var(--tc-ink-muted)]">Accidental Drags Blocked</p>
-          <p className="mt-1.5 text-2xl font-semibold text-[var(--tc-primary-ink)] tabular-nums">
-            {functional?.total_drags_prevented ?? 0}
-          </p>
-        </div>
-        <div className="p-5">
-          <p className="text-xs font-medium text-[var(--tc-ink-muted)]">
-            Double-Click Bounces Stopped
-          </p>
-          <p className="mt-1.5 text-2xl font-semibold text-[var(--tc-primary-ink)] tabular-nums">
-            {functional?.total_bounces_blocked ?? 0}
-          </p>
-        </div>
-      </div>
-
-      {/* 15-Second Guided Motor Check-In (Point 2) */}
+      {/* 15-Second Guided Motor Check-In */}
       <MotorCheckinCard onCompleted={load} />
 
       {checkins.length > 0 && (
-        <section className="cc-card p-5">
-          <h3 className="text-base font-semibold text-[var(--tc-ink)]">
+        <section className="space-y-4 border-t border-[var(--tc-border)] pt-8">
+          <h3 className="text-[18px] font-semibold text-[var(--tc-ink)]">
             Standardized 15-Second Check-In History
           </h3>
-          <div className="mt-3 overflow-x-auto">
-            <table className="w-full border-collapse text-left text-xs sm:text-sm">
+          <div className="cc-sheet overflow-x-auto px-5 py-2">
+            <table className="w-full border-collapse text-left text-[14.5px]">
               <thead>
                 <tr className="border-b border-[var(--tc-border)] text-[var(--tc-ink-muted)]">
-                  <th className="py-2.5 pr-3 font-semibold">Time</th>
-                  <th className="py-2.5 pr-3 font-semibold">Context</th>
-                  <th className="py-2.5 pr-3 font-semibold">Overall</th>
-                  <th className="py-2.5 pr-3 font-semibold">Hold RMS / Freq</th>
-                  <th className="py-2.5 pr-3 font-semibold">Tap Accuracy</th>
-                  <th className="py-2.5 pr-3 font-semibold">Notes</th>
-                  <th className="py-2.5 font-semibold">Action</th>
+                  <th className="py-3 pr-4 font-semibold">Time</th>
+                  <th className="py-3 pr-4 font-semibold">Context</th>
+                  <th className="py-3 pr-4 font-semibold">Overall</th>
+                  <th className="py-3 pr-4 font-semibold">Hold RMS / Freq</th>
+                  <th className="py-3 pr-4 font-semibold">Tap Accuracy</th>
+                  <th className="py-3 pr-4 font-semibold">Notes</th>
+                  <th className="py-3 font-semibold">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--tc-border)]">
                 {checkins.map((c) => (
                   <tr key={c.id}>
-                    <td className="py-2.5 pr-3 tabular-nums">
+                    <td className="py-3 pr-4 tabular-nums">
                       {new Date(c.timestamp * 1000).toLocaleString()}
                     </td>
-                    <td className="py-2.5 pr-3 capitalize">{c.context_tag.replace("_", " ")}</td>
-                    <td className="py-2.5 pr-3 font-semibold text-[var(--tc-primary-ink)] tabular-nums">
+                    <td className="py-3 pr-4 capitalize">{c.context_tag.replace("_", " ")}</td>
+                    <td className="py-3 pr-4 font-semibold text-[var(--tc-primary-ink)] tabular-nums">
                       {c.overall_score.toFixed(1)}/100
                     </td>
-                    <td className="py-2.5 pr-3 tabular-nums">
+                    <td className="py-3 pr-4 tabular-nums">
                       {c.hold_rms_mm.toFixed(2)} mm
                       {c.hold_dominant_hz !== null ? ` (${c.hold_dominant_hz.toFixed(1)} Hz)` : ""}
                     </td>
-                    <td className="py-2.5 pr-3 tabular-nums">
+                    <td className="py-3 pr-4 tabular-nums">
                       {c.tap_accuracy_pct !== null ? `${c.tap_accuracy_pct.toFixed(0)}%` : "-"}
                     </td>
-                    <td className="py-2.5 pr-3 text-[var(--tc-ink-muted)]">{c.notes || "-"}</td>
-                    <td className="py-2.5">
+                    <td className="py-3 pr-4 text-[var(--tc-ink-muted)]">{c.notes || "-"}</td>
+                    <td className="py-3">
                       <button
                         type="button"
                         aria-label={`Delete check-in ${c.id}`}
                         onClick={() => void handleDeleteCheckin(c.id)}
-                        className="rounded-lg p-1.5 text-[var(--tc-alert)] hover:bg-[var(--tc-alert-bg)]"
+                        className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-lg text-[var(--tc-alert)] hover:bg-[var(--tc-alert-bg)]"
                       >
                         <Trash2 className="h-4 w-4" aria-hidden="true" />
                       </button>
@@ -816,42 +841,42 @@ export function SessionHistory() {
         </section>
       )}
 
-      {/* Opt-In Keyboard Timing Summary (Point 4) */}
+      {/* Opt-In Keyboard Timing Summary (Flat layout, zero nested boxes) */}
       {cadenceSummary && cadenceSummary.window_count > 0 && (
-        <section aria-labelledby="cadence-heading" className="cc-card p-5">
+        <section aria-labelledby="cadence-heading" className="space-y-5 border-t border-[var(--tc-border)] pt-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <Keyboard className="h-4 w-4 text-[var(--tc-primary-ink)]" aria-hidden="true" />
-              <h3 id="cadence-heading" className="text-base font-semibold text-[var(--tc-ink)]">
+              <Keyboard className="h-5 w-5 text-[var(--tc-primary)]" aria-hidden="true" />
+              <h3 id="cadence-heading" className="text-[18px] font-semibold text-[var(--tc-ink)]">
                 Keyboard Timing Biomarkers (Opt-In)
               </h3>
             </div>
-            <span className="rounded-full bg-[var(--tc-surface-alt)] px-3 py-1 text-xs font-medium text-[var(--tc-ink-muted)]">
+            <span className="text-[14px] text-[var(--tc-ink-muted)]">
               Timing-only statistics; zero keystrokes or text recorded
             </span>
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-xl bg-[var(--tc-surface-alt)] px-4 py-3">
-              <p className="text-xs text-[var(--tc-ink-muted)]">Mean Key Hold (Dwell)</p>
-              <p className="mt-1 text-xl font-semibold text-[var(--tc-ink)] tabular-nums">
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+            <div>
+              <p className="text-[14px] text-[var(--tc-ink-muted)]">Mean Key Hold (Dwell)</p>
+              <p className="mt-1 text-[24px] font-semibold text-[var(--tc-ink)] tabular-nums">
                 {cadenceSummary.avg_hold_ms.toFixed(1)} ms
               </p>
             </div>
-            <div className="rounded-xl bg-[var(--tc-surface-alt)] px-4 py-3">
-              <p className="text-xs text-[var(--tc-ink-muted)]">Mean Inter-Key Flight</p>
-              <p className="mt-1 text-xl font-semibold text-[var(--tc-ink)] tabular-nums">
+            <div>
+              <p className="text-[14px] text-[var(--tc-ink-muted)]">Mean Inter-Key Flight</p>
+              <p className="mt-1 text-[24px] font-semibold text-[var(--tc-ink)] tabular-nums">
                 {cadenceSummary.avg_flight_ms.toFixed(1)} ms
               </p>
             </div>
-            <div className="rounded-xl bg-[var(--tc-surface-alt)] px-4 py-3">
-              <p className="text-xs text-[var(--tc-ink-muted)]">Rhythm Regularity</p>
-              <p className="mt-1 text-xl font-semibold text-[var(--tc-primary-ink)] tabular-nums">
+            <div>
+              <p className="text-[14px] text-[var(--tc-ink-muted)]">Rhythm Regularity</p>
+              <p className="mt-1 text-[24px] font-semibold text-[var(--tc-primary-ink)] tabular-nums">
                 {cadenceSummary.avg_regularity_score.toFixed(1)} / 100
               </p>
             </div>
-            <div className="rounded-xl bg-[var(--tc-surface-alt)] px-4 py-3">
-              <p className="text-xs text-[var(--tc-ink-muted)]">Measured Keystrokes</p>
-              <p className="mt-1 text-xl font-semibold text-[var(--tc-ink)] tabular-nums">
+            <div>
+              <p className="text-[14px] text-[var(--tc-ink-muted)]">Measured Keystrokes</p>
+              <p className="mt-1 text-[24px] font-semibold text-[var(--tc-ink)] tabular-nums">
                 {cadenceSummary.total_keystrokes} ({cadenceSummary.window_count} windows)
               </p>
             </div>
@@ -859,35 +884,35 @@ export function SessionHistory() {
         </section>
       )}
 
-      {/* How to Read the Clinical Data */}
-      <section aria-labelledby="how-to-read-heading" className="cc-card p-5">
+      {/* How to Read the Clinical Data (Open Editorial — Zero Nested Cards) */}
+      <section aria-labelledby="how-to-read-heading" className="space-y-4 border-t border-[var(--tc-border)] pt-8">
         <div className="flex items-center gap-2.5">
-          <Info className="h-5 w-5 shrink-0 text-[var(--tc-primary-ink)]" aria-hidden="true" />
-          <h3 id="how-to-read-heading" className="text-base font-semibold text-[var(--tc-ink)]">
+          <Info className="h-5 w-5 shrink-0 text-[var(--tc-primary)]" aria-hidden="true" />
+          <h3 id="how-to-read-heading" className="text-[18px] font-semibold text-[var(--tc-ink)]">
             How to Read This Clinical Motor Data
           </h3>
         </div>
-        <p className="mt-1.5 text-xs leading-relaxed text-[var(--tc-ink-muted)]">
+        <p className="max-w-3xl text-[14.5px] leading-relaxed text-[var(--tc-ink-muted)]">
           Non-Diagnostic Assistive Telemetry: Metrics summarize real-world mouse displacement spectra and standardized check-ins to support discussions with your physician or occupational therapist; ClearCursor is not a diagnostic medical device.
         </p>
-        <dl className="mt-4 grid grid-cols-1 gap-4 text-sm text-[var(--tc-ink)] md:grid-cols-2">
-          <div className="rounded-xl bg-[var(--tc-surface-alt)] p-4">
-            <dt className="font-semibold text-[var(--tc-primary-ink)]">
+        <dl className="grid grid-cols-1 gap-8 pt-2 md:grid-cols-2">
+          <div>
+            <dt className="text-[15.5px] font-semibold text-[var(--tc-ink)]">
               Cursor Stability Score (0 to 100)
             </dt>
-            <dd className="mt-1 text-xs leading-relaxed text-[var(--tc-ink)]">
-              Measures overall steadiness. <strong>85-100</strong> means smooth control,{" "}
-              <strong>65-84</strong> shows mild/moderate shaking being dampened, and{" "}
-              <strong>below 65</strong> flags heavy tremor activity.
+            <dd className="mt-1 text-[14.5px] leading-relaxed text-[var(--tc-ink-muted)]">
+              Measures overall steadiness. <strong className="text-[var(--tc-ink)]">85-100</strong> means smooth control,{" "}
+              <strong className="text-[var(--tc-ink)]">65-84</strong> shows mild/moderate shaking being dampened, and{" "}
+              <strong className="text-[var(--tc-ink)]">below 65</strong> flags heavy tremor activity.
             </dd>
           </div>
-          <div className="rounded-xl bg-[var(--tc-surface-alt)] p-4">
-            <dt className="font-semibold text-[var(--tc-primary-ink)]">
+          <div>
+            <dt className="text-[15.5px] font-semibold text-[var(--tc-ink)]">
               4-6 Hz Resting vs 6-12 Hz Action Bands
             </dt>
-            <dd className="mt-1 text-xs leading-relaxed text-[var(--tc-ink)]">
-              Separates lower-frequency resting tremor energy (<strong>4-6 Hz</strong>) from
-              kinetic/postural essential tremor energy (<strong>6-12 Hz</strong>) alongside
+            <dd className="mt-1 text-[14.5px] leading-relaxed text-[var(--tc-ink-muted)]">
+              Separates lower-frequency resting tremor energy (<strong className="text-[var(--tc-ink)]">4-6 Hz</strong>) from
+              kinetic/postural essential tremor energy (<strong className="text-[var(--tc-ink)]">6-12 Hz</strong>) alongside
               physical RMS amplitude in millimeters.
             </dd>
           </div>
@@ -895,21 +920,21 @@ export function SessionHistory() {
       </section>
 
       {/* Medication & Symptom Event Diary */}
-      <section aria-labelledby="diary-heading" className="cc-card p-5">
+      <section aria-labelledby="diary-heading" className="space-y-5 border-t border-[var(--tc-border)] pt-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Pill className="h-5 w-5 text-[var(--tc-primary-ink)]" aria-hidden="true" />
-            <h3 id="diary-heading" className="text-base font-semibold text-[var(--tc-ink)]">
+            <Pill className="h-5 w-5 text-[var(--tc-primary)]" aria-hidden="true" />
+            <h3 id="diary-heading" className="text-[18px] font-semibold text-[var(--tc-ink)]">
               Medication &amp; Symptom Diary
             </h3>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2.5">
             <button
               type="button"
               disabled={savingEvent}
               onClick={() => void handleQuickEvent("medication", "Medication Dose Taken")}
-              className="min-h-10 rounded-xl bg-[var(--tc-mint)] px-3.5 text-xs font-semibold text-[var(--tc-primary-ink)] transition-colors hover:opacity-90"
+              className="min-h-11 rounded-xl bg-[var(--tc-mint)] px-4 text-[14px] font-semibold text-[var(--tc-primary-ink)] transition-colors hover:opacity-90"
             >
               + Medication Taken
             </button>
@@ -917,7 +942,7 @@ export function SessionHistory() {
               type="button"
               disabled={savingEvent}
               onClick={() => void handleQuickEvent("flare", "Tremor Flare", 4)}
-              className="min-h-10 rounded-xl bg-[var(--tc-alert-bg)] px-3.5 text-xs font-semibold text-[var(--tc-alert)] transition-colors hover:opacity-90"
+              className="min-h-11 rounded-xl bg-[var(--tc-alert-bg)] px-4 text-[14px] font-semibold text-[var(--tc-alert)] transition-colors hover:opacity-90"
             >
               + Tremor Flare
             </button>
@@ -925,7 +950,7 @@ export function SessionHistory() {
               type="button"
               disabled={savingEvent}
               onClick={() => void handleQuickEvent("fatigue", "Hand Fatigue", 3)}
-              className="min-h-10 rounded-xl bg-[var(--tc-surface-alt)] px-3.5 text-xs font-semibold text-[var(--tc-ink)] transition-colors hover:opacity-90"
+              className="min-h-11 rounded-xl bg-[var(--tc-surface-alt)] px-4 text-[14px] font-semibold text-[var(--tc-ink)] transition-colors hover:opacity-90"
             >
               + Fatigue
             </button>
@@ -934,13 +959,13 @@ export function SessionHistory() {
 
         <form
           onSubmit={(e) => void handleSubmitEvent(e)}
-          className="mt-4 grid grid-cols-1 gap-2.5 md:grid-cols-12"
+          className="grid grid-cols-1 gap-3 md:grid-cols-12"
         >
           <select
             aria-label="Event type"
             value={eventType}
             onChange={(e) => setEventType(e.target.value as ClinicalEventType)}
-            className="min-h-11 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-bg)] px-3 text-sm font-medium text-[var(--tc-ink)] md:col-span-2"
+            className="min-h-12 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-3.5 text-[15px] font-medium text-[var(--tc-ink)] md:col-span-2"
           >
             <option value="medication">Medication</option>
             <option value="flare">Tremor Flare</option>
@@ -953,20 +978,20 @@ export function SessionHistory() {
             value={eventLabel}
             onChange={(e) => setEventLabel(e.target.value)}
             placeholder="Label (e.g. Carbidopa-Levodopa)"
-            className="min-h-11 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-bg)] px-3 text-sm text-[var(--tc-ink)] md:col-span-3"
+            className="min-h-12 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-3.5 text-[15px] text-[var(--tc-ink)] md:col-span-3"
           />
           <input
             type="text"
             value={eventDosage}
             onChange={(e) => setEventDosage(e.target.value)}
             placeholder="Dosage (optional)"
-            className="min-h-11 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-bg)] px-3 text-sm text-[var(--tc-ink)] md:col-span-2"
+            className="min-h-12 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-3.5 text-[15px] text-[var(--tc-ink)] md:col-span-2"
           />
           <select
             aria-label="Severity"
             value={eventSeverity}
             onChange={(e) => setEventSeverity(e.target.value)}
-            className="min-h-11 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-bg)] px-3 text-sm text-[var(--tc-ink)] md:col-span-2"
+            className="min-h-12 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-3.5 text-[15px] text-[var(--tc-ink)] md:col-span-2"
           >
             <option value="">Severity (opt.)</option>
             <option value="1">1 - Very Mild</option>
@@ -980,12 +1005,12 @@ export function SessionHistory() {
             value={eventNotes}
             onChange={(e) => setEventNotes(e.target.value)}
             placeholder="Notes (optional)"
-            className="min-h-11 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-bg)] px-3 text-sm text-[var(--tc-ink)] md:col-span-2"
+            className="min-h-12 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-3.5 text-[15px] text-[var(--tc-ink)] md:col-span-2"
           />
           <button
             type="submit"
             disabled={savingEvent || !eventLabel.trim()}
-            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-[var(--tc-primary)] px-4 text-sm font-semibold text-white hover:bg-[var(--tc-primary-hover)] disabled:opacity-50 md:col-span-1"
+            className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-xl bg-[var(--tc-primary)] px-4 text-[15px] font-semibold text-white hover:bg-[var(--tc-primary-hover)] disabled:opacity-50 md:col-span-1"
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
             <span>Log</span>
@@ -994,35 +1019,35 @@ export function SessionHistory() {
 
         {events.length > 0 && (
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full border-collapse text-left text-xs sm:text-sm">
+            <table className="w-full border-collapse text-left text-[14.5px]">
               <thead>
                 <tr className="border-b border-[var(--tc-border)] text-[var(--tc-ink-muted)]">
-                  <th className="py-2 pr-3 font-semibold">Time</th>
-                  <th className="py-2 pr-3 font-semibold">Type</th>
-                  <th className="py-2 pr-3 font-semibold">Label</th>
-                  <th className="py-2 pr-3 font-semibold">Dosage / Severity</th>
-                  <th className="py-2 pr-3 font-semibold">Notes</th>
-                  <th className="py-2 font-semibold">Action</th>
+                  <th className="py-2.5 pr-3 font-semibold">Time</th>
+                  <th className="py-2.5 pr-3 font-semibold">Type</th>
+                  <th className="py-2.5 pr-3 font-semibold">Label</th>
+                  <th className="py-2.5 pr-3 font-semibold">Dosage / Severity</th>
+                  <th className="py-2.5 pr-3 font-semibold">Notes</th>
+                  <th className="py-2.5 font-semibold">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--tc-border)]">
                 {events.map((ev) => (
                   <tr key={ev.id}>
-                    <td className="py-2.5 pr-3 tabular-nums">
+                    <td className="py-3 pr-3 tabular-nums">
                       {new Date(ev.timestamp * 1000).toLocaleString()}
                     </td>
-                    <td className="py-2.5 pr-3 font-medium capitalize">{ev.event_type}</td>
-                    <td className="py-2.5 pr-3 font-semibold text-[var(--tc-ink)]">{ev.label}</td>
-                    <td className="py-2.5 pr-3">
+                    <td className="py-3 pr-3 font-medium capitalize">{ev.event_type}</td>
+                    <td className="py-3 pr-3 font-semibold text-[var(--tc-ink)]">{ev.label}</td>
+                    <td className="py-3 pr-3">
                       {ev.dosage || (ev.severity ? `${ev.severity}/5` : "-")}
                     </td>
-                    <td className="py-2.5 pr-3 text-[var(--tc-ink-muted)]">{ev.notes || "-"}</td>
-                    <td className="py-2.5">
+                    <td className="py-3 pr-3 text-[var(--tc-ink-muted)]">{ev.notes || "-"}</td>
+                    <td className="py-3">
                       <button
                         type="button"
                         aria-label={`Delete event ${ev.label}`}
                         onClick={() => void handleDeleteEvent(ev.id)}
-                        className="rounded-lg p-1.5 text-[var(--tc-alert)] hover:bg-[var(--tc-alert-bg)]"
+                        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl text-[var(--tc-alert)] hover:bg-[var(--tc-alert-bg)]"
                       >
                         <Trash2 className="h-4 w-4" aria-hidden="true" />
                       </button>
@@ -1036,18 +1061,18 @@ export function SessionHistory() {
       </section>
 
       {/* Recharts Daily Stability, Multi-Band & Honest 24h Diurnal Coverage Charts */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <section aria-labelledby="daily-trend-heading" className="cc-card p-5">
-          <h3 id="daily-trend-heading" className="mb-3 text-sm font-semibold text-[var(--tc-ink)]">
+      <div className="grid grid-cols-1 gap-8 border-t border-[var(--tc-border)] pt-8 lg:grid-cols-3">
+        <section aria-labelledby="daily-trend-heading" className="space-y-3">
+          <h3 id="daily-trend-heading" className="text-[16px] font-semibold text-[var(--tc-ink)]">
             Daily Stability Score (0-100)
           </h3>
 
           {trends.length === 0 ? (
-            <p className="rounded-xl bg-[var(--tc-surface-alt)] p-5 text-xs text-[var(--tc-ink-muted)]">
+            <p className="text-[14.5px] leading-relaxed text-[var(--tc-ink-muted)]">
               No daily stability trends recorded in this window yet.
             </p>
           ) : (
-            <div className="h-56 w-full">
+            <div className="cc-sheet h-60 w-full p-3">
               <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <AreaChart data={trends}>
                   <defs>
@@ -1060,14 +1085,14 @@ export function SessionHistory() {
                   <XAxis
                     dataKey="date"
                     stroke="var(--tc-chart-axis)"
-                    fontSize={11}
+                    fontSize={12}
                     tickLine={false}
                     axisLine={false}
                   />
                   <YAxis
                     domain={[0, 100]}
                     stroke="var(--tc-chart-axis)"
-                    fontSize={11}
+                    fontSize={12}
                     tickLine={false}
                     axisLine={false}
                   />
@@ -1083,7 +1108,7 @@ export function SessionHistory() {
                       border: "1px solid var(--tc-border-strong)",
                       borderRadius: "10px",
                       color: "var(--tc-ink)",
-                      fontSize: "12px",
+                      fontSize: "13px",
                     }}
                   />
                   <Area
@@ -1100,31 +1125,31 @@ export function SessionHistory() {
           )}
         </section>
 
-        <section aria-labelledby="tremor-trend-heading" className="cc-card p-5">
-          <h3 id="tremor-trend-heading" className="mb-3 text-sm font-semibold text-[var(--tc-ink)]">
+        <section aria-labelledby="tremor-trend-heading" className="space-y-3">
+          <h3 id="tremor-trend-heading" className="text-[16px] font-semibold text-[var(--tc-ink)]">
             Resting (4-6 Hz) vs Action (6-12 Hz)
           </h3>
 
           {trends.length === 0 ? (
-            <p className="rounded-xl bg-[var(--tc-surface-alt)] p-5 text-xs text-[var(--tc-ink-muted)]">
+            <p className="text-[14.5px] leading-relaxed text-[var(--tc-ink-muted)]">
               Spectral bands populate automatically during everyday pointer movement.
             </p>
           ) : (
-            <div className="h-56 w-full">
+            <div className="cc-sheet h-60 w-full p-3">
               <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <BarChart data={trends}>
                   <CartesianGrid stroke="var(--tc-chart-grid)" strokeDasharray="3 3" vertical={false} />
                   <XAxis
                     dataKey="date"
                     stroke="var(--tc-chart-axis)"
-                    fontSize={11}
+                    fontSize={12}
                     tickLine={false}
                     axisLine={false}
                   />
                   <YAxis
                     domain={[0, 100]}
                     stroke="var(--tc-chart-axis)"
-                    fontSize={11}
+                    fontSize={12}
                     tickLine={false}
                     axisLine={false}
                   />
@@ -1134,10 +1159,10 @@ export function SessionHistory() {
                       border: "1px solid var(--tc-border-strong)",
                       borderRadius: "10px",
                       color: "var(--tc-ink)",
-                      fontSize: "12px",
+                      fontSize: "13px",
                     }}
                   />
-                  <Legend wrapperStyle={{ fontSize: "11px" }} />
+                  <Legend wrapperStyle={{ fontSize: "12px" }} />
                   <Bar
                     dataKey="avg_resting_band_pct"
                     name="4-6 Hz Resting (%)"
@@ -1156,29 +1181,29 @@ export function SessionHistory() {
           )}
         </section>
 
-        <section aria-labelledby="diurnal-heading" className="cc-card p-5">
-          <div className="mb-3 flex items-center justify-between gap-2">
-            <h3 id="diurnal-heading" className="text-sm font-semibold text-[var(--tc-ink)]">
-              Time-of-Day Diurnal Pattern (0-23h)
+        <section aria-labelledby="diurnal-heading" className="space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <h3 id="diurnal-heading" className="text-[16px] font-semibold text-[var(--tc-ink)]">
+              Time-of-Day Pattern (0-23h)
             </h3>
-            <span className="text-xs text-[var(--tc-ink-muted)] tabular-nums">
+            <span className="text-[14px] text-[var(--tc-ink-muted)] tabular-nums">
               {activeHoursCount}/24 hrs
             </span>
           </div>
 
           {activeHoursCount === 0 ? (
-            <p className="rounded-xl bg-[var(--tc-surface-alt)] p-5 text-xs text-[var(--tc-ink-muted)]">
+            <p className="text-[14.5px] leading-relaxed text-[var(--tc-ink-muted)]">
               Hourly tremor distribution appears once sessions are recorded across the day. Unrecorded hours stay blank.
             </p>
           ) : (
-            <div className="h-56 w-full">
+            <div className="cc-sheet h-60 w-full p-3">
               <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <BarChart data={diurnalGrid}>
                   <CartesianGrid stroke="var(--tc-chart-grid)" strokeDasharray="3 3" vertical={false} />
                   <XAxis
                     dataKey="label"
                     stroke="var(--tc-chart-axis)"
-                    fontSize={10}
+                    fontSize={11}
                     interval={3}
                     tickLine={false}
                     axisLine={false}
@@ -1186,7 +1211,7 @@ export function SessionHistory() {
                   <YAxis
                     domain={[0, 100]}
                     stroke="var(--tc-chart-axis)"
-                    fontSize={11}
+                    fontSize={12}
                     tickLine={false}
                     axisLine={false}
                   />
@@ -1207,7 +1232,7 @@ export function SessionHistory() {
                       border: "1px solid var(--tc-border-strong)",
                       borderRadius: "10px",
                       color: "var(--tc-ink)",
-                      fontSize: "12px",
+                      fontSize: "13px",
                     }}
                   />
                   <Bar
@@ -1224,18 +1249,18 @@ export function SessionHistory() {
       </div>
 
       {/* Descriptive Sessions & Calibrations Tables */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <section className="cc-card p-5">
-          <h3 className="text-base font-semibold text-[var(--tc-ink)]">
+      <div className="grid grid-cols-1 gap-8 border-t border-[var(--tc-border)] pt-8 lg:grid-cols-2">
+        <section className="space-y-3">
+          <h3 className="text-[18px] font-semibold text-[var(--tc-ink)]">
             Recorded Motor Telemetry Sessions
           </h3>
           {sessions.length === 0 ? (
-            <p className="mt-3 text-sm text-[var(--tc-ink-muted)]">
+            <p className="text-[15px] text-[var(--tc-ink-muted)]">
               No completed real-world sessions stored yet in this window.
             </p>
           ) : (
-            <div className="mt-3 overflow-x-auto">
-              <table className="w-full border-collapse text-left text-xs sm:text-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-left text-[14.5px]">
                 <thead>
                   <tr className="border-b border-[var(--tc-border)] text-[var(--tc-ink-muted)]">
                     <th className="py-2.5 pr-3 font-semibold">Completed</th>
@@ -1248,20 +1273,20 @@ export function SessionHistory() {
                 <tbody className="divide-y divide-[var(--tc-border)]">
                   {sessions.map((s) => (
                     <tr key={s.session_id}>
-                      <td className="py-2.5 pr-3 tabular-nums">
+                      <td className="py-3 pr-3 tabular-nums">
                         {new Date(s.ended_at * 1000).toLocaleString()}
                       </td>
-                      <td className="py-2.5 pr-3 font-semibold text-[var(--tc-primary-ink)] tabular-nums">
+                      <td className="py-3 pr-3 font-semibold text-[var(--tc-primary-ink)] tabular-nums">
                         {s.avg_stability_score.toFixed(1)}
                       </td>
-                      <td className="py-2.5 pr-3 tabular-nums">
+                      <td className="py-3 pr-3 tabular-nums">
                         {s.avg_tremor_index.toFixed(1)}% ({(s.avg_rms_amplitude_mm ?? 0).toFixed(2)}{" "}
                         mm)
                       </td>
-                      <td className="py-2.5 pr-3 tabular-nums">
+                      <td className="py-3 pr-3 tabular-nums">
                         {s.avg_tremor_hz !== null ? `${s.avg_tremor_hz.toFixed(2)} Hz` : "None"}
                       </td>
-                      <td className="py-2.5 tabular-nums">
+                      <td className="py-3 tabular-nums">
                         {s.had_stabilization ? "Stabilized" : "Baseline"} ({s.sample_count})
                       </td>
                     </tr>
@@ -1272,17 +1297,17 @@ export function SessionHistory() {
           )}
         </section>
 
-        <section className="cc-card p-5">
-          <h3 className="text-base font-semibold text-[var(--tc-ink)]">
+        <section className="space-y-3">
+          <h3 className="text-[18px] font-semibold text-[var(--tc-ink)]">
             Saved Gaze Calibration Accuracy Records
           </h3>
           {calibrations.length === 0 ? (
-            <p className="mt-3 text-sm text-[var(--tc-ink-muted)]">
+            <p className="text-[15px] text-[var(--tc-ink-muted)]">
               No gaze calibration profiles saved yet.
             </p>
           ) : (
-            <div className="mt-3 overflow-x-auto">
-              <table className="w-full border-collapse text-left text-xs sm:text-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-left text-[14.5px]">
                 <thead>
                   <tr className="border-b border-[var(--tc-border)] text-[var(--tc-ink-muted)]">
                     <th className="py-2.5 pr-3 font-semibold">Profile Name</th>
@@ -1294,10 +1319,10 @@ export function SessionHistory() {
                 <tbody className="divide-y divide-[var(--tc-border)]">
                   {calibrations.map((c) => (
                     <tr key={c.id}>
-                      <td className="py-2.5 pr-3 font-medium text-[var(--tc-ink)]">{c.name}</td>
-                      <td className="py-2.5 pr-3 uppercase">{c.source}</td>
-                      <td className="py-2.5 pr-3 tabular-nums">{c.error_px.toFixed(1)} px</td>
-                      <td className="py-2.5 font-medium">
+                      <td className="py-3 pr-3 font-medium text-[var(--tc-ink)]">{c.name}</td>
+                      <td className="py-3 pr-3 uppercase">{c.source}</td>
+                      <td className="py-3 pr-3 tabular-nums">{c.error_px.toFixed(1)} px</td>
+                      <td className="py-3 font-medium">
                         {c.is_active ? "Active" : "Archived"}
                       </td>
                     </tr>

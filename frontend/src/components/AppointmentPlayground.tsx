@@ -509,57 +509,66 @@ export function AppointmentPlayground({
   const accuracyPct = totalAttempts > 0 ? Math.round((hits / totalAttempts) * 100) : 100;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold text-[var(--tc-ink)]">
-            Sandbox Test Playground &amp; 10-Step Trial
+    <div className="space-y-9">
+      {/* Editorial Intro + Sandbox Photo */}
+      <section className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12">
+        <div className="space-y-4 lg:col-span-7">
+          <h2 className="text-[20px] font-semibold text-[var(--tc-ink)]">
+            Practice Clicking Safely Before Going System-Wide
           </h2>
-          <p className="mt-0.5 text-sm text-[var(--tc-ink-muted)]">
-            Compare the dashed crimson raw input path against the solid green One Euro stabilized path across targets and controls.
+          <p className="text-[15.5px] leading-relaxed text-[var(--tc-ink-muted)]">
+            Compare the dashed red raw input trail against the solid green stabilized trail across appointment buttons, checkboxes, and form inputs.
           </p>
+
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <button
+              type="button"
+              onClick={handleResetTrial}
+              className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-[var(--tc-primary)] px-5 text-[15px] font-semibold text-white transition-colors hover:bg-[var(--tc-primary-hover)]"
+            >
+              {trialActive && trialStep > 0 ? (
+                <RotateCcw className="h-4 w-4 shrink-0" aria-hidden="true" />
+              ) : (
+                <Play className="h-4 w-4 shrink-0" aria-hidden="true" />
+              )}
+              <span>{trialStep > 0 ? "Restart 10-Step Trial" : "Start 10-Step Trial"}</span>
+            </button>
+
+            <button
+              type="button"
+              disabled={toggling}
+              aria-pressed={settings.simulate_tremor}
+              onClick={() =>
+                void onToggle({
+                  simulate_tremor: !settings.simulate_tremor,
+                  assistance_enabled: true,
+                })
+              }
+              className={`inline-flex min-h-12 items-center gap-2 rounded-xl border px-4 text-[14.5px] font-medium transition-colors ${
+                settings.simulate_tremor
+                  ? "border-[var(--tc-alert)]/40 bg-[var(--tc-alert-bg)] text-[var(--tc-alert)]"
+                  : "border-[var(--tc-border-strong)] bg-[var(--tc-surface)] text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)]"
+              }`}
+            >
+              <Waves className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>
+                Shaky Tremor Sim: {settings.simulate_tremor ? "ON (4-7 Hz)" : "OFF"}
+              </span>
+            </button>
+          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <button
-            type="button"
-            disabled={toggling}
-            aria-pressed={settings.simulate_tremor}
-            onClick={() =>
-              void onToggle({
-                simulate_tremor: !settings.simulate_tremor,
-                assistance_enabled: true,
-              })
-            }
-            className={`inline-flex min-h-11 items-center gap-2 rounded-xl border px-4 text-sm font-medium transition-colors ${
-              settings.simulate_tremor
-                ? "border-[var(--tc-alert)]/40 bg-[var(--tc-alert-bg)] text-[var(--tc-alert)]"
-                : "border-[var(--tc-border-strong)] bg-[var(--tc-surface)] text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)]"
-            }`}
-          >
-            <Waves className="h-4 w-4 shrink-0" aria-hidden="true" />
-            <span>
-              Shaky Tremor Sim: {settings.simulate_tremor ? "ON (4-7 Hz)" : "OFF"}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={handleResetTrial}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[var(--tc-primary)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--tc-primary-hover)]"
-          >
-            {trialActive && trialStep > 0 ? (
-              <RotateCcw className="h-4 w-4 shrink-0" aria-hidden="true" />
-            ) : (
-              <Play className="h-4 w-4 shrink-0" aria-hidden="true" />
-            )}
-            <span>{trialStep > 0 ? "Restart 10-Step Trial" : "Start 10-Step Trial"}</span>
-          </button>
+        <div className="overflow-hidden rounded-2xl border border-[var(--tc-border)] lg:col-span-5">
+          <img
+            src="/media/sandbox-practice.webp"
+            alt="Minimalist mouse, keyboard, and notebook on a calm desk"
+            className="aspect-[16/9] w-full object-cover"
+          />
         </div>
-      </div>
+      </section>
 
       {/* Mode Comparison Selector */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="cc-sheet grid grid-cols-1 divide-y divide-[var(--tc-border)] sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x">
         {MODES.map((item) => {
           const selected = mode === item.id;
           return (
@@ -568,14 +577,18 @@ export function AppointmentPlayground({
               type="button"
               aria-pressed={selected}
               onClick={() => void handleSelectMode(item)}
-              className={`min-h-[82px] rounded-2xl border p-4 text-left transition-colors ${
-                selected
-                  ? "border-[var(--tc-primary)] bg-[var(--tc-mint)]"
-                  : "border-[var(--tc-border)] bg-[var(--tc-surface)] shadow-[var(--tc-shadow)] hover:bg-[var(--tc-surface-alt)]"
+              className={`min-h-[92px] p-4 text-left transition-colors ${
+                selected ? "bg-[var(--tc-mint)]" : "hover:bg-[var(--tc-surface-alt)]"
               }`}
             >
-              <span className="block text-sm font-semibold text-[var(--tc-ink)]">{item.title}</span>
-              <span className="mt-1 block text-xs leading-relaxed text-[var(--tc-ink-muted)]">
+              <span
+                className={`block text-[15px] font-semibold ${
+                  selected ? "text-[var(--tc-primary-ink)]" : "text-[var(--tc-ink)]"
+                }`}
+              >
+                {item.title}
+              </span>
+              <span className="mt-1 block text-[14px] leading-snug text-[var(--tc-ink-muted)]">
                 {item.subtitle}
               </span>
             </button>
@@ -583,26 +596,28 @@ export function AppointmentPlayground({
         })}
       </div>
 
-      {/* Dual-Trace Canvas Card */}
-      <section className="cc-card space-y-3.5 p-5">
+      {/* Dual-Trace Canvas Section (Flat, zero nested cards) */}
+      <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div
             role="status"
             aria-live="polite"
-            className="text-sm font-semibold text-[var(--tc-ink)] tabular-nums"
+            className="text-[16px] font-semibold text-[var(--tc-ink)] tabular-nums"
           >
             {expectedId !== null
               ? `Step ${trialStep + 1} of 10: Click ${STEP_LABELS[expectedId]}`
               : "10-Step Trial Complete"}
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-[var(--tc-ink)] tabular-nums">
+          <div className="flex flex-wrap items-center gap-5 text-[15px] font-semibold text-[var(--tc-ink)] tabular-nums">
             <span>Hits: {hits}</span>
             <span>Misses: {misses}</span>
             <span className="text-[var(--tc-primary-ink)]">Accuracy: {accuracyPct}%</span>
-            <span className="font-mono text-xs text-[var(--tc-ink-muted)]">
-              FFT: {liveHz !== null ? `${liveHz.toFixed(2)} Hz` : "Idle"}
-            </span>
+            {liveHz !== null && (
+              <span className="font-mono text-[14px] text-[var(--tc-ink-muted)]">
+                {liveHz.toFixed(1)} Hz
+              </span>
+            )}
           </div>
         </div>
 
@@ -615,40 +630,44 @@ export function AppointmentPlayground({
           onPointerDown={(e) => void handleCanvasPointerDown(e)}
           onPointerLeave={() => setInside(false)}
           aria-label="Dual-trace HTML5 canvas showing raw tremor trail, stabilized pointer trail, and 5 appointment targets with extended boundaries"
-          className="w-full cursor-crosshair select-none rounded-xl border border-[var(--tc-border)] bg-[var(--tc-bg)]"
+          className="w-full cursor-crosshair select-none rounded-2xl border border-[var(--tc-border)] bg-[var(--tc-surface)]"
         />
 
-        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[var(--tc-ink-muted)]">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-[14px] text-[var(--tc-ink-muted)]">
           <span>
-            Dashed crimson: raw input | Solid green: One Euro stabilized path | Dashed blue: extended boundary
+            Dashed crimson: raw input | Solid green: stabilized path | Dashed blue: expanded hitbox
           </span>
           <span className="font-medium text-[var(--tc-ink)]">{lastFeedback}</span>
         </div>
       </section>
 
-      <SteppedControl
-        id="extended-boundary-padding"
-        label="Extended Click Boundary Padding"
-        description="Expands forgiving hitboxes around the 5 clinic booking targets for Larger Targets and Full Assist modes."
-        value={paddingPx}
-        min={0}
-        max={36}
-        step={4}
-        unit="px"
-        onChange={setPaddingPx}
-      />
+      <div className="border-t border-[var(--tc-border)] pt-2">
+        <SteppedControl
+          id="extended-boundary-padding"
+          label="Extended Click Boundary Padding"
+          description="Expands forgiving hitboxes around the 5 clinic booking targets."
+          value={paddingPx}
+          min={0}
+          max={36}
+          step={4}
+          unit="px"
+          onChange={setPaddingPx}
+        />
+      </div>
 
-      {/* Everyday UI Target Sandbox */}
-      <section className="cc-card p-5">
-        <h3 className="text-base font-semibold text-[var(--tc-ink)]">
-          Everyday Control Practice Area
-        </h3>
-        <p className="mt-0.5 text-sm text-[var(--tc-ink-muted)]">
-          Test checkboxes, text inputs, and click-freeze buttons while pointer stabilization or tremor simulation is active.
-        </p>
+      {/* Everyday UI Target Sandbox (Flat layout, no nested cards) */}
+      <section className="space-y-5 border-t border-[var(--tc-border)] pt-8">
+        <div>
+          <h3 className="text-[18px] font-semibold text-[var(--tc-ink)]">
+            Everyday Control Practice Area
+          </h3>
+          <p className="mt-1 text-[14.5px] text-[var(--tc-ink-muted)]">
+            Try checkboxes, a note input, and a tap button with stabilization active.
+          </p>
+        </div>
 
-        <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-3">
-          <div className="space-y-2.5">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          <div className="space-y-3">
             {[
               "Confirm morning appointment",
               "Bring medication schedule list",
@@ -664,10 +683,10 @@ export function AppointmentPlayground({
                     prev.map((v, i) => (i === idx ? !v : v))
                   )
                 }
-                className={`flex min-h-12 w-full items-center gap-3 rounded-xl border px-3.5 text-left text-sm font-medium transition-colors ${
+                className={`flex min-h-12 w-full items-center gap-3 rounded-xl border px-4 text-left text-[15px] font-medium transition-colors ${
                   sandboxChecks[idx]
                     ? "border-[var(--tc-primary)] bg-[var(--tc-mint)] text-[var(--tc-ink)]"
-                    : "border-[var(--tc-border)] bg-[var(--tc-surface-alt)]/60 text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)]"
+                    : "border-[var(--tc-border-strong)] bg-[var(--tc-surface)] text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)]"
                 }`}
               >
                 {sandboxChecks[idx] ? (
@@ -689,7 +708,7 @@ export function AppointmentPlayground({
           <div className="space-y-3">
             <label
               htmlFor="sandbox-note-input"
-              className="block text-sm font-semibold text-[var(--tc-ink)]"
+              className="block text-[15px] font-semibold text-[var(--tc-ink)]"
             >
               Visit Note Practice Input
             </label>
@@ -699,30 +718,30 @@ export function AppointmentPlayground({
               value={sandboxNote}
               onChange={(e) => setSandboxNote(e.target.value)}
               placeholder="Click inside and type a short test note..."
-              className="min-h-12 w-full rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-bg)] px-3.5 text-sm text-[var(--tc-ink)]"
+              className="min-h-12 w-full rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-4 text-[15px] text-[var(--tc-ink)]"
             />
             <button
               type="button"
               onClick={() => setSandboxNote("")}
-              className="inline-flex min-h-11 items-center rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-4 text-sm font-medium text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)]"
+              className="inline-flex min-h-11 items-center rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-4 text-[14.5px] font-medium text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)]"
             >
               Clear Note
             </button>
           </div>
 
-          <div className="flex flex-col justify-between rounded-xl bg-[var(--tc-surface-alt)] p-4">
+          <div className="flex flex-col justify-between space-y-4">
             <div>
-              <p className="text-sm font-semibold text-[var(--tc-ink)]">
+              <p className="text-[15px] font-semibold text-[var(--tc-ink)]">
                 Quick Target Tap Counter
               </p>
-              <p className="mt-1 text-3xl font-semibold text-[var(--tc-primary-ink)] tabular-nums">
+              <p className="mt-1 text-[32px] font-semibold text-[var(--tc-primary-ink)] tabular-nums">
                 {sandboxClickCount} clicks
               </p>
             </div>
             <button
               type="button"
               onClick={() => setSandboxClickCount((c) => c + 1)}
-              className="mt-4 min-h-12 w-full rounded-xl bg-[var(--tc-primary)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--tc-primary-hover)]"
+              className="min-h-12 w-full rounded-xl bg-[var(--tc-primary)] px-5 text-[15px] font-semibold text-white transition-colors hover:bg-[var(--tc-primary-hover)]"
             >
               Tap Cleanly to Test Click-Freeze
             </button>
