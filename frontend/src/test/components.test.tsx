@@ -146,9 +146,46 @@ const BASE_FRAME: TelemetryFrame = {
 describe("ClearCursor Frontend Suite", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.localStorage.clear();
   });
 
-  it("renders HomeOverview offline editorial illustrations cleanly and triggers navigation", () => {
+  it("renders Welcome tutorial on first launch and Welcome back with Replay Tutorial after completion", async () => {
+    vi.spyOn(client, "fetchSettings").mockResolvedValue(BASE_SETTINGS);
+    vi.spyOn(client, "fetchSystemPermissions").mockResolvedValue({
+      platform: "macos",
+      accessibility_trusted: true,
+      input_monitoring_trusted: true,
+      needs_prompt: false,
+      message: null,
+    });
+
+    const { unmount } = render(<App />);
+    await waitFor(() =>
+      expect(screen.getByText("Welcome to ClearCursor")).toBeInTheDocument()
+    );
+    expect(screen.getByText(/Step 1 of 3/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^Continue$/i }));
+    expect(screen.getByText(/Choose Your Starting Comfort Level/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^Continue$/i }));
+    expect(screen.getByText(/Pause Anytime/i)).toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Finish & Open Summary/i })
+    );
+    expect(window.localStorage.getItem("clearcursor-tutorial-completed")).toBe("true");
+    unmount();
+
+    render(<App />);
+    await waitFor(() => expect(screen.getByText("Welcome back")).toBeInTheDocument());
+    expect(screen.getByRole("button", { name: /Replay Tutorial/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Replay Tutorial/i }));
+    expect(screen.getByText(/Step 1 of 3/i)).toBeInTheDocument();
+  });
+
+  it("renders HomeOverview cleanly without em-dashes and triggers navigation", () => {
     const onStart = vi.fn();
     const onPlay = vi.fn();
     const onDeck = vi.fn();
@@ -162,8 +199,8 @@ describe("ClearCursor Frontend Suite", () => {
     );
 
     expect(container.textContent).not.toContain("\u2014");
-    expect(screen.getByText("Calm Everyday Desktop Control")).toBeInTheDocument();
     expect(screen.getByText(/ClearCursor Assistive Desktop/i)).toBeInTheDocument();
+    expect(screen.getByText("Comfort Level")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Start Stabilizing/i }));
     expect(onStart).toHaveBeenCalledTimes(1);
@@ -172,7 +209,7 @@ describe("ClearCursor Frontend Suite", () => {
     expect(onPlay).toHaveBeenCalledTimes(1);
   });
 
-  it("handles ControlDeck medication presets and displays Gravity Well + click protection telemetry", async () => {
+  it("keeps Hz visible in ControlDeck and reveals Gravity Well + click protection behind Show Technical Details", async () => {
     const onToggle = vi.fn().mockResolvedValue(undefined);
     const onApplyPreset = vi.fn().mockResolvedValue(undefined);
     const onCal = vi.fn();
@@ -192,6 +229,11 @@ describe("ClearCursor Frontend Suite", () => {
       />
     );
 
+    expect(screen.getByText("5.40")).toBeInTheDocument();
+    expect(screen.getByText("Hz")).toBeInTheDocument();
+    expect(screen.queryByText(/Gravity Wells: Locked \(Button\)/i)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Show Technical Details/i }));
     expect(screen.getByText(/Gravity Wells: Locked \(Button\)/i)).toBeInTheDocument();
     expect(screen.getByText(/Frozen/i)).toBeInTheDocument();
 
@@ -207,15 +249,16 @@ describe("ClearCursor Frontend Suite", () => {
     });
   });
 
-  it("opens Advanced Tuning and Per-App Exclusions in SensitivityPanel and persists to SQLite", async () => {
+  it("opens Shortcuts & Apps and Advanced Tuning tabs in SensitivityPanel and persists to SQLite", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     render(<SensitivityPanel settings={BASE_SETTINGS} saving={false} onSave={onSave} />);
 
-    // Add excluded app quick button
+    // Switch to Shortcuts & Apps tab and add excluded app
+    fireEvent.click(screen.getByRole("tab", { name: /Shortcuts & Apps/i }));
     fireEvent.click(screen.getByRole("button", { name: /\+ Figma/i }));
     expect(screen.getByText("Figma")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Advanced Tuning/i }));
+    fireEvent.click(screen.getByRole("tab", { name: /Advanced Tuning/i }));
     const incFreeze = screen.getByRole("button", { name: /Increase Click-Freeze Duration by 20 ms/i });
     fireEvent.click(incFreeze);
 

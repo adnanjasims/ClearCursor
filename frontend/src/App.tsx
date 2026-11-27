@@ -26,6 +26,7 @@ import {
   TopBar,
   WorkspaceHeader,
 } from "./components/TopBar";
+import { WelcomePage } from "./components/WelcomePage";
 import { useTelemetry } from "./hooks/useTelemetry";
 import type {
   CalibrateResponse,
@@ -36,9 +37,34 @@ import type {
 } from "./types/telemetry";
 
 const THEME_STORAGE_KEY = "clearcursor-theme";
+const TUTORIAL_STORAGE_KEY = "clearcursor-tutorial-completed";
+const VALID_VIEWS: AppView[] = [
+  "welcome",
+  "home",
+  "deck",
+  "playground",
+  "sensitivity",
+  "history",
+];
+
+function loadInitialView(): AppView {
+  try {
+    const param = new URLSearchParams(window.location.search).get("view");
+    if (param && VALID_VIEWS.includes(param as AppView)) {
+      return param as AppView;
+    }
+  } catch {
+    // ignore URL parsing errors
+  }
+  return "welcome";
+}
 
 function loadInitialTheme(): ThemeMode {
   try {
+    const param = new URLSearchParams(window.location.search).get("theme");
+    if (param === "light" || param === "dark") {
+      return param;
+    }
     const saved = window.localStorage.getItem(THEME_STORAGE_KEY);
     if (saved === "light" || saved === "dark") {
       return saved;
@@ -47,6 +73,17 @@ function loadInitialTheme(): ThemeMode {
     // ignore storage restriction
   }
   return "light";
+}
+
+function loadTutorialCompleted(): boolean {
+  try {
+    const param = new URLSearchParams(window.location.search).get("tutorial");
+    if (param === "1") return false;
+    if (param === "0") return true;
+    return window.localStorage.getItem(TUTORIAL_STORAGE_KEY) === "true";
+  } catch {
+    return false;
+  }
 }
 
 const DEFAULT_SETTINGS: SettingsPayload = {
@@ -95,8 +132,10 @@ const DEFAULT_SETTINGS: SettingsPayload = {
 };
 
 export function App() {
-  const [activeView, setActiveView] = useState<AppView>("home");
+  const [activeView, setActiveView] = useState<AppView>(loadInitialView);
   const [theme, setTheme] = useState<ThemeMode>(loadInitialTheme);
+  const [tutorialCompleted, setTutorialCompleted] = useState<boolean>(loadTutorialCompleted);
+  const [replayingTutorial, setReplayingTutorial] = useState<boolean>(false);
   const [settings, setSettings] = useState<SettingsPayload>(DEFAULT_SETTINGS);
   const [loadingSettings, setLoadingSettings] = useState<boolean>(true);
   const [busy, setBusy] = useState<boolean>(false);
@@ -156,7 +195,6 @@ export function App() {
     void loadInitialSettings();
   }, [loadInitialSettings]);
 
-  // Keep UI settings synchronized if the native tray menu or global hotkey toggles backend modes
   useEffect(() => {
     if (!frame) {
       return;
@@ -190,7 +228,6 @@ export function App() {
     });
   }, [frame]);
 
-  // Keep Tauri menu bar / tray label and minimize-to-tray behavior synced with UI state
   useEffect(() => {
     const active = Boolean(settings.assistance_enabled && settings.steady_hand);
     const statusText = frame?.steadyhand.excluded_app_active
@@ -296,6 +333,16 @@ export function App() {
     }
   };
 
+  const handleCompleteTutorial = () => {
+    setTutorialCompleted(true);
+    setReplayingTutorial(false);
+    try {
+      window.localStorage.setItem(TUTORIAL_STORAGE_KEY, "true");
+    } catch {
+      // ignore storage errors
+    }
+  };
+
   const handleCalibrationComplete = (_result: CalibrateResponse) => {
     void loadInitialSettings();
   };
@@ -334,12 +381,17 @@ export function App() {
   const lightingQuality = frame?.gaze.running ? frame.gaze.lighting_quality : "ok";
   const lightingMessage =
     lightingQuality === "low_light"
-      ? "Low webcam lighting detected. Adaptive enhancement is active, and facing a soft lamp will further steady gaze tracking."
+      ? "Low webcam lighting detected. Facing a soft lamp will further steady gaze tracking."
       : lightingQuality === "backlit"
-      ? "Bright background light behind you. Adaptive contrast is active; dimming a bright window behind you helps landmark stability."
+      ? "Bright light behind you. Dimming a bright window behind you helps landmark stability."
       : lightingQuality === "overexposed"
-      ? "Strong glare on your face detected. Lowering screen brightness or tilting away from direct sunlight helps eye tracking."
+      ? "Strong glare on your face detected. Tilting away from direct sunlight helps eye tracking."
       : null;
+
+  const tutorialActive = !tutorialCompleted || replayingTutorial;
+  const welcomeTitle = tutorialActive
+    ? "Welcome to ClearCursor"
+    : "Welcome back";
 
   return (
     <div className="flex min-h-screen flex-col bg-[var(--tc-bg)] text-[var(--tc-ink)] md:flex-row">
@@ -355,34 +407,35 @@ export function App() {
         onChangeTheme={setTheme}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <WorkspaceHeader
-          activeView={activeView}
-          stabilizationActive={stabilizationActive}
-          bypassLabel={bypassLabel}
-          shortcutLabel={settings.global_shortcut}
-          busy={busy}
-          gazeActive={anyGazeActive}
-          onToggleStabilization={() =>
-            void handleToggle({
-              steady_hand: !stabilizationActive,
-              assistance_enabled: true,
-            })
-          }
-          onStopGaze={() => void handleEmergencyStopGaze()}
-          theme={theme}
-          onChangeTheme={setTheme}
-        />
+      <main className="min-w-0 flex-1 overflow-y-auto">
+        <div className="mx-auto w-full max-w-[1060px] px-6 py-8 sm:px-10">
+          <WorkspaceHeader
+            activeView={activeView}
+            titleOverride={activeView === "welcome" ? welcomeTitle : undefined}
+            stabilizationActive={stabilizationActive}
+            bypassLabel={bypassLabel}
+            shortcutLabel={settings.global_shortcut}
+            busy={busy}
+            gazeActive={anyGazeActive}
+            onToggleStabilization={() =>
+              void handleToggle({
+                steady_hand: !stabilizationActive,
+                assistance_enabled: true,
+              })
+            }
+            onStopGaze={() => void handleEmergencyStopGaze()}
+            theme={theme}
+            onChangeTheme={setTheme}
+          />
 
-        <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-7">
           {permissions?.needs_prompt && (
             <div
               role="status"
-              className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[var(--tc-warn)]/35 bg-[var(--tc-warn-bg)] p-5 text-[var(--tc-warn)]"
+              className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[var(--tc-warn)]/30 bg-[var(--tc-warn-bg)] px-5 py-4 text-[var(--tc-warn)]"
             >
               <div className="space-y-1">
-                <p className="text-base font-semibold">System Pointer Permission Needed</p>
-                <p className="text-sm text-[var(--tc-ink)]">
+                <p className="text-[15.5px] font-semibold">System Pointer Permission Needed</p>
+                <p className="text-[14px] text-[var(--tc-ink)]">
                   {permissions.message ??
                     "Grant Accessibility & Input Monitoring access for system-wide smoothing and button Magnetism."}
                 </p>
@@ -392,7 +445,7 @@ export function App() {
                   type="button"
                   disabled={promptingPerm}
                   onClick={() => void handlePermissionAction(false)}
-                  className="min-h-12 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-4 text-sm font-semibold text-[var(--tc-ink)] transition-colors hover:bg-[var(--tc-surface-alt)] disabled:opacity-50"
+                  className="min-h-11 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-4 text-[14px] font-semibold text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)] disabled:opacity-50"
                 >
                   Prompt Permission
                 </button>
@@ -400,7 +453,7 @@ export function App() {
                   type="button"
                   disabled={promptingPerm}
                   onClick={() => void handlePermissionAction(true)}
-                  className="min-h-12 rounded-xl bg-[var(--tc-primary)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--tc-primary-hover)] disabled:opacity-50"
+                  className="min-h-11 rounded-xl bg-[var(--tc-primary)] px-4 text-[14px] font-semibold text-white hover:bg-[var(--tc-primary-hover)] disabled:opacity-50"
                 >
                   Open System Settings
                 </button>
@@ -411,10 +464,10 @@ export function App() {
           {lightingMessage && (
             <div
               role="status"
-              className="cc-card mb-6 px-5 py-3.5 text-sm text-[var(--tc-ink)]"
+              className="cc-sheet mb-6 px-5 py-3.5 text-[14.5px] text-[var(--tc-ink)]"
             >
               <span className="font-semibold text-[var(--tc-primary-ink)]">
-                Camera Lighting Adaptation:{" "}
+                Camera Lighting:{" "}
               </span>
               {lightingMessage}
             </div>
@@ -423,9 +476,9 @@ export function App() {
           {(apiError || errorMessage) && (
             <div
               role="alert"
-              className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[var(--tc-alert)]/35 bg-[var(--tc-alert-bg)] p-5 text-[var(--tc-alert)]"
+              className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[var(--tc-alert)]/30 bg-[var(--tc-alert-bg)] px-5 py-4 text-[var(--tc-alert)]"
             >
-              <p className="text-sm font-semibold">{apiError ?? errorMessage}</p>
+              <p className="text-[14.5px] font-medium">{apiError ?? errorMessage}</p>
               <button
                 type="button"
                 onClick={() => {
@@ -433,7 +486,7 @@ export function App() {
                   reconnect();
                   void loadInitialSettings();
                 }}
-                className="min-h-11 rounded-xl bg-[var(--tc-alert)] px-4 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                className="min-h-11 rounded-xl bg-[var(--tc-alert)] px-4 text-[14px] font-semibold text-white hover:opacity-90"
               >
                 Retry Connection
               </button>
@@ -442,19 +495,28 @@ export function App() {
 
           {loadingSettings ? (
             <div className="space-y-4" aria-busy="true" aria-label="Loading workspace">
-              <div className="cc-card h-36 animate-pulse p-6">
-                <div className="h-5 w-48 rounded-md bg-[var(--tc-surface-alt)]" />
-                <div className="mt-3 h-4 w-80 max-w-full rounded-md bg-[var(--tc-surface-alt)]" />
-                <p className="mt-6 text-sm text-[var(--tc-ink-muted)]">
+              <div className="cc-sheet h-40 animate-pulse p-6">
+                <div className="h-5 w-48 rounded bg-[var(--tc-surface-alt)]" />
+                <div className="mt-3 h-4 w-80 max-w-full rounded bg-[var(--tc-surface-alt)]" />
+                <p className="mt-6 text-[14.5px] text-[var(--tc-ink-muted)]">
                   Connecting to ClearCursor backend...
                 </p>
               </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className="cc-card h-28 animate-pulse" />
-                <div className="cc-card h-28 animate-pulse" />
-                <div className="cc-card h-28 animate-pulse" />
-              </div>
             </div>
+          ) : activeView === "welcome" ? (
+            <WelcomePage
+              isReturningUser={tutorialCompleted}
+              tutorialActive={tutorialActive}
+              stabilizationActive={stabilizationActive}
+              activeProfile={settings.profile}
+              onCompleteTutorial={handleCompleteTutorial}
+              onReplayTutorial={() => setReplayingTutorial(true)}
+              onApplyPreset={handleSaveSettings}
+              onGoToSummary={() => setActiveView("home")}
+              onGoToControlDeck={() => setActiveView("deck")}
+              onGoToPlayground={() => setActiveView("playground")}
+              onGoToClinicianReport={() => setActiveView("history")}
+            />
           ) : activeView === "home" ? (
             <HomeOverview
               stabilizationActive={stabilizationActive}
@@ -462,8 +524,11 @@ export function App() {
               onOpenPlayground={() => setActiveView("playground")}
               onOpenControlDeck={() => setActiveView("deck")}
               onOpenClinicianReport={() => setActiveView("history")}
+              onApplyPreset={handleSaveSettings}
               activeProfile={settings.profile}
+              frame={frame}
               stabilityScore={frame ? smoothedScore : null}
+              busy={busy}
             />
           ) : activeView === "deck" ? (
             <ControlDeck
@@ -493,8 +558,8 @@ export function App() {
           ) : (
             <SessionHistory />
           )}
-        </main>
-      </div>
+        </div>
+      </main>
 
       {calibrating && (
         <CalibrationWizard

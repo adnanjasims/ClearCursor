@@ -1,17 +1,6 @@
-import {
-  Check,
-  ChevronDown,
-  ChevronUp,
-  Keyboard,
-  Monitor,
-  Plus,
-  RotateCcw,
-  Save,
-  X,
-} from "lucide-react";
+import { Check, Monitor, Plus, RotateCcw, Save, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { fetchDisplays } from "../api/client";
-import { CLINICAL_PRESETS, type ClinicalPreset } from "../presets";
 import type {
   BypassKeyOption,
   DisplaysResponse,
@@ -26,6 +15,8 @@ interface SensitivityPanelProps {
   saving: boolean;
   onSave: (updates: SettingsUpdate) => Promise<void>;
 }
+
+type TuningTab = "everyday" | "shortcuts" | "advanced";
 
 const SUGGESTED_EXCLUDED_APPS = ["Figma", "Photoshop", "Illustrator", "Blender", "Procreate"];
 const BYPASS_OPTIONS: { value: BypassKeyOption; label: string }[] = [
@@ -58,21 +49,21 @@ function SettingSwitchRow({
       type="button"
       aria-pressed={checked}
       onClick={onToggle}
-      className="flex min-h-14 w-full items-center justify-between gap-4 px-5 py-3.5 text-left transition-colors hover:bg-[var(--tc-surface-alt)]/70"
+      className="flex min-h-[68px] w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-[var(--tc-surface-alt)]/60"
     >
       <div className="min-w-0">
-        <span className="block text-sm font-semibold text-[var(--tc-ink)]">{label}</span>
+        <span className="block text-[15.5px] font-medium text-[var(--tc-ink)]">{label}</span>
         {description && (
-          <span className="mt-0.5 block text-xs text-[var(--tc-ink-muted)]">{description}</span>
+          <span className="mt-0.5 block text-[14px] text-[var(--tc-ink-muted)]">{description}</span>
         )}
       </div>
       <span
-        className={`inline-flex h-7 w-12 shrink-0 items-center rounded-full p-0.5 transition-colors ${
-          checked ? "bg-[var(--tc-primary)]" : "bg-[var(--tc-border-strong)]"
+        className={`inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors ${
+          checked ? "bg-[var(--tc-switch-on)]" : "bg-[var(--tc-switch-off)]"
         }`}
       >
         <span
-          className={`h-6 w-6 rounded-full bg-white shadow-xs transition-transform ${
+          className={`h-5 w-5 rounded-full bg-white shadow-xs transition-transform ${
             checked ? "translate-x-5" : "translate-x-0"
           }`}
         />
@@ -87,9 +78,9 @@ export function SensitivityPanel({
   saving,
   onSave,
 }: SensitivityPanelProps) {
+  const [activeTab, setActiveTab] = useState<TuningTab>("everyday");
   const [draft, setDraft] = useState<SettingsPayload>(settings);
   const [savedNotice, setSavedNotice] = useState<string | null>(null);
-  const [advancedOpen, setAdvancedOpen] = useState<boolean>(false);
   const [displaySummary, setDisplaySummary] = useState<DisplaysResponse | null>(null);
   const [newAppInput, setNewAppInput] = useState<string>("");
 
@@ -119,14 +110,6 @@ export function SensitivityPanel({
   ) => {
     setSavedNotice(null);
     setDraft((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleApplyPreset = async (preset: ClinicalPreset) => {
-    setSavedNotice(null);
-    const merged = { ...draft, ...preset.updates };
-    setDraft(merged);
-    await onSave(preset.updates);
-    setSavedNotice(`Applied "${preset.label}" and persisted settings.`);
   };
 
   const addExcludedApp = (appName: string) => {
@@ -210,329 +193,303 @@ export function SensitivityPanel({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold text-[var(--tc-ink)]">
-            Comfort Presets &amp; Everyday Tuning
+    <div className="space-y-8">
+      {/* Editorial Top Banner */}
+      <section className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12">
+        <div className="space-y-3 lg:col-span-7">
+          <h2 className="text-[20px] font-semibold text-[var(--tc-ink)]">
+            Tailor ClearCursor to Your Desk &amp; Routine
           </h2>
-          <p className="mt-0.5 text-sm text-[var(--tc-ink-muted)]">
-            Pick a preset matching how your hands feel right now, configure shortcuts and excluded apps, or adjust filter constants.
+          <p className="text-[15.5px] leading-relaxed text-[var(--tc-ink-muted)]">
+            Keep everyday settings simple, configure apps where smoothing pauses automatically, or fine-tune filter constants when you need deeper control.
           </p>
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border border-[var(--tc-border)] lg:col-span-5">
+          <img
+            src="/media/tuning-desk.webp"
+            alt="Close-up of minimalist keyboard keys and ergonomic wireless mouse in soft daylight"
+            className="aspect-[16/9] w-full object-cover"
+          />
+        </div>
+      </section>
+
+      {/* Clean 3-Tab Navigation Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--tc-border)] pb-4">
+        <div role="tablist" aria-label="Tuning categories" className="flex flex-wrap gap-2">
+          {[
+            { id: "everyday" as const, label: "Everyday" },
+            { id: "shortcuts" as const, label: "Shortcuts & Apps" },
+            { id: "advanced" as const, label: "Advanced Tuning" },
+          ].map((tab) => {
+            const active = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setActiveTab(tab.id)}
+                className={`min-h-11 rounded-xl px-4 text-[15px] font-medium transition-colors ${
+                  active
+                    ? "bg-[var(--tc-primary)] text-white"
+                    : "bg-[var(--tc-surface)] text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)]"
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
         <button
           type="button"
           onClick={resetDefaults}
-          className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-4 text-sm font-medium text-[var(--tc-ink)] transition-colors hover:bg-[var(--tc-surface-alt)]"
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3.5 text-[14.5px] font-medium text-[var(--tc-ink-muted)] hover:bg-[var(--tc-surface-alt)] hover:text-[var(--tc-ink)]"
         >
           <RotateCcw className="h-4 w-4" aria-hidden="true" />
           <span>Reset Defaults</span>
         </button>
       </div>
 
-      {/* One-Tap Medication State Presets */}
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        {CLINICAL_PRESETS.map((preset) => {
-          const selected = draft.profile === preset.id;
-          return (
-            <button
-              key={preset.id}
-              type="button"
-              disabled={saving}
-              aria-pressed={selected}
-              onClick={() => void handleApplyPreset(preset)}
-              className={`min-h-[88px] rounded-2xl border p-4 text-left transition-colors ${
-                selected
-                  ? "border-[var(--tc-primary)] bg-[var(--tc-mint)]"
-                  : "border-[var(--tc-border)] bg-[var(--tc-surface)] shadow-[var(--tc-shadow)] hover:bg-[var(--tc-surface-alt)]"
-              }`}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-semibold text-[var(--tc-ink)]">{preset.label}</span>
-                <span
-                  className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                    selected
-                      ? "bg-[var(--tc-primary)] text-white"
-                      : "bg-[var(--tc-surface-alt)] text-[var(--tc-ink-muted)]"
-                  }`}
-                >
-                  {selected ? "Active" : "Apply"}
-                </span>
-              </div>
-              <p className="mt-1 text-xs leading-relaxed text-[var(--tc-ink-muted)]">
-                {preset.clinicalNote}
-              </p>
-            </button>
-          );
-        })}
-      </div>
+      {/* Tab 1: Everyday Protection & Behavior */}
+      {activeTab === "everyday" && (
+        <div className="space-y-8">
+          <section className="space-y-3">
+            <h3 className="cc-section-label">Pointer &amp; Click Protection</h3>
+            <div className="cc-sheet divide-y divide-[var(--tc-border)] overflow-hidden">
+              <SettingSwitchRow
+                label="Button Magnetism (Gravity Wells)"
+                description="Gently helps the pointer settle onto small toolbar buttons."
+                checked={draft.gravity_wells}
+                onToggle={() => updateField("gravity_wells", !draft.gravity_wells)}
+              />
+              <SettingSwitchRow
+                label="Click-Freeze & Anti-Drag"
+                description="Holds the cursor steady during a click to prevent accidental file drags."
+                checked={draft.anti_drag}
+                onToggle={() => updateField("anti_drag", !draft.anti_drag)}
+              />
+              <SettingSwitchRow
+                label="Scroll Jitter Guard"
+                description="Smooths jerky scroll-wheel and trackpad reversals."
+                checked={draft.scroll_smoothing}
+                onToggle={() => updateField("scroll_smoothing", !draft.scroll_smoothing)}
+              />
+              <SettingSwitchRow
+                label="Right-Click Twitch Guard"
+                description="Ignores stray right-clicks triggered while pressing the left button."
+                checked={draft.right_click_guard}
+                onToggle={() => updateField("right_click_guard", !draft.right_click_guard)}
+              />
+              <SettingSwitchRow
+                label="Adaptive Tremor Ramping"
+                description="Automatically adjusts smoothing strength based on live tremor intensity."
+                checked={draft.adaptive_smoothing}
+                onToggle={() => updateField("adaptive_smoothing", !draft.adaptive_smoothing)}
+              />
+            </div>
+          </section>
 
-      {/* Grouped Native Settings Lists */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <section className="cc-card overflow-hidden">
-          <div className="border-b border-[var(--tc-border)] px-5 py-3.5">
-            <h3 className="text-sm font-semibold text-[var(--tc-ink)]">
-              Pointer &amp; Click Protection
-            </h3>
-          </div>
-          <div className="divide-y divide-[var(--tc-border)]">
-            <SettingSwitchRow
-              label="Button Magnetism (Gravity Wells)"
-              description="Gently pulls slowed pointers toward native Accessibility buttons."
-              checked={draft.gravity_wells}
-              onToggle={() => updateField("gravity_wells", !draft.gravity_wells)}
-            />
-            <SettingSwitchRow
-              label="Click-Freeze & Anti-Drag"
-              description="Anchors cursor briefly on mouse-down to stop accidental drags."
-              checked={draft.anti_drag}
-              onToggle={() => updateField("anti_drag", !draft.anti_drag)}
-            />
-            <SettingSwitchRow
-              label="Scroll Jitter Guard"
-              description="Dampens bidirectional micro-reversals on scroll wheels and trackpads."
-              checked={draft.scroll_smoothing}
-              onToggle={() => updateField("scroll_smoothing", !draft.scroll_smoothing)}
-            />
-            <SettingSwitchRow
-              label="Right-Click Twitch Guard"
-              description="Prevents involuntary secondary-button taps during left-click presses."
-              checked={draft.right_click_guard}
-              onToggle={() => updateField("right_click_guard", !draft.right_click_guard)}
-            />
-            <SettingSwitchRow
-              label="Smooth Adaptive Ramping"
-              description="Gradually scales filter intensity with measured tremor amplitude."
-              checked={draft.adaptive_smoothing}
-              onToggle={() => updateField("adaptive_smoothing", !draft.adaptive_smoothing)}
-            />
-          </div>
-        </section>
-
-        <section className="cc-card overflow-hidden">
-          <div className="border-b border-[var(--tc-border)] px-5 py-3.5">
-            <h3 className="text-sm font-semibold text-[var(--tc-ink)]">
-              Desktop Behavior, Gaze &amp; Optional Telemetry
-            </h3>
-          </div>
-          <div className="divide-y divide-[var(--tc-border)]">
-            <SettingSwitchRow
-              label="Keep Running in Tray on Window Close"
-              description="Closing the window hides to menu bar or tray so stabilization stays active."
-              checked={draft.minimize_to_tray}
-              onToggle={() => updateField("minimize_to_tray", !draft.minimize_to_tray)}
-            />
-            <SettingSwitchRow
-              label="Resume OS Smoothing on Launch"
-              description="Automatically re-arm system cursor interception when ClearCursor starts."
-              checked={draft.resume_stabilization_on_launch}
-              onToggle={() =>
-                updateField(
-                  "resume_stabilization_on_launch",
-                  !draft.resume_stabilization_on_launch
-                )
-              }
-            />
-            <button
-              type="button"
-              onClick={() =>
-                updateField("gaze_source", draft.gaze_source === "head" ? "eyes" : "head")
-              }
-              className="flex min-h-14 w-full items-center justify-between gap-4 px-5 py-3.5 text-left transition-colors hover:bg-[var(--tc-surface-alt)]/70"
-            >
-              <div>
-                <span className="block text-sm font-semibold text-[var(--tc-ink)]">
-                  Gaze Input Source
-                </span>
-                <span className="mt-0.5 block text-xs text-[var(--tc-ink-muted)]">
-                  Switch between head pose pointing and iris tracking.
-                </span>
-              </div>
-              <span className="rounded-lg bg-[var(--tc-surface-alt)] px-3 py-1 font-mono text-xs font-semibold uppercase text-[var(--tc-ink)]">
-                {draft.gaze_source}
-              </span>
-            </button>
-            <SettingSwitchRow
-              label="Opt-In Keyboard Timing Telemetry"
-              description="Measures anonymous key hold and flight intervals for bradykinesia reports. Never logs or inspects which keys are pressed."
-              checked={Boolean(draft.keyboard_cadence_telemetry)}
-              onToggle={() =>
-                updateField("keyboard_cadence_telemetry", !draft.keyboard_cadence_telemetry)
-              }
-            />
-          </div>
-        </section>
-      </div>
-
-      {/* Hotkeys & Modifiers */}
-      <section className="cc-card p-5">
-        <div className="mb-4 flex items-center gap-2">
-          <Keyboard className="h-4 w-4 text-[var(--tc-primary-ink)]" aria-hidden="true" />
-          <h3 className="text-sm font-semibold text-[var(--tc-ink)]">
-            Modifiers &amp; Global Hotkeys
-          </h3>
-        </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div>
-            <label
-              htmlFor="bypass-key-select"
-              className="block text-xs font-semibold text-[var(--tc-ink)]"
-            >
-              Hold-to-Bypass Key
-            </label>
-            <p className="mt-0.5 text-xs text-[var(--tc-ink-muted)]">
-              Temporarily pauses smoothing while held for freehand work.
-            </p>
-            <select
-              id="bypass-key-select"
-              value={draft.bypass_key}
-              onChange={(e) => updateField("bypass_key", e.target.value as BypassKeyOption)}
-              className="mt-2 min-h-11 w-full rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-bg)] px-3 text-sm font-medium text-[var(--tc-ink)]"
-            >
-              {BYPASS_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label
-              htmlFor="precision-key-select"
-              className="block text-xs font-semibold text-[var(--tc-ink)]"
-            >
-              Precision Slow-Mode Key
-            </label>
-            <p className="mt-0.5 text-xs text-[var(--tc-ink-muted)]">
-              Scales pointer speed to 35% while held for tiny targets.
-            </p>
-            <select
-              id="precision-key-select"
-              value={draft.precision_key}
-              onChange={(e) => updateField("precision_key", e.target.value as PrecisionKeyOption)}
-              className="mt-2 min-h-11 w-full rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-bg)] px-3 text-sm font-medium text-[var(--tc-ink)]"
-            >
-              {PRECISION_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label
-              htmlFor="global-shortcut-input"
-              className="block text-xs font-semibold text-[var(--tc-ink)]"
-            >
-              Global Toggle Hotkey
-            </label>
-            <p className="mt-0.5 text-xs text-[var(--tc-ink-muted)]">
-              Emergency Stop All is always bound to Cmd/Ctrl+Alt+Esc.
-            </p>
-            <input
-              id="global-shortcut-input"
-              type="text"
-              value={draft.global_shortcut}
-              onChange={(e) => updateField("global_shortcut", e.target.value)}
-              className="mt-2 min-h-11 w-full rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-bg)] px-3 font-mono text-sm font-medium text-[var(--tc-ink)]"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Per-App Exclusions */}
-      <section className="cc-card p-5">
-        <h3 className="text-sm font-semibold text-[var(--tc-ink)]">
-          Per-App Auto-Exclusions
-        </h3>
-        <p className="mt-0.5 text-xs text-[var(--tc-ink-muted)]">
-          ClearCursor automatically bypasses cursor interception whenever one of these creative or gaming apps is focused.
-        </p>
-
-        <div className="mt-3 flex flex-wrap gap-2">
-          {draft.excluded_apps.map((app) => (
-            <span
-              key={app}
-              className="inline-flex items-center gap-1.5 rounded-full bg-[var(--tc-mint)] px-3 py-1 text-xs font-semibold text-[var(--tc-primary-ink)]"
-            >
-              <span>{app}</span>
+          <section className="space-y-3">
+            <h3 className="cc-section-label">App Behavior &amp; Optional Biomarkers</h3>
+            <div className="cc-sheet divide-y divide-[var(--tc-border)] overflow-hidden">
+              <SettingSwitchRow
+                label="Keep Running in Tray on Window Close"
+                description="Closing the window keeps ClearCursor quietly active in your menu bar or tray."
+                checked={draft.minimize_to_tray}
+                onToggle={() => updateField("minimize_to_tray", !draft.minimize_to_tray)}
+              />
+              <SettingSwitchRow
+                label="Resume Stabilization on Launch"
+                description="Automatically turn on system-wide smoothing when you open ClearCursor."
+                checked={draft.resume_stabilization_on_launch}
+                onToggle={() =>
+                  updateField(
+                    "resume_stabilization_on_launch",
+                    !draft.resume_stabilization_on_launch
+                  )
+                }
+              />
               <button
                 type="button"
-                aria-label={`Remove excluded app ${app}`}
-                onClick={() => removeExcludedApp(app)}
-                className="rounded-full p-0.5 hover:bg-[var(--tc-surface)]"
+                onClick={() =>
+                  updateField("gaze_source", draft.gaze_source === "head" ? "eyes" : "head")
+                }
+                className="flex min-h-[68px] w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-[var(--tc-surface-alt)]/60"
               >
-                <X className="h-3.5 w-3.5" aria-hidden="true" />
+                <div>
+                  <span className="block text-[15.5px] font-medium text-[var(--tc-ink)]">
+                    Gaze Input Source
+                  </span>
+                  <span className="mt-0.5 block text-[14px] text-[var(--tc-ink-muted)]">
+                    Choose between head pose pointing and eye iris tracking.
+                  </span>
+                </div>
+                <span className="rounded-lg bg-[var(--tc-surface-alt)] px-3.5 py-1.5 font-mono text-[14px] font-semibold uppercase text-[var(--tc-ink)]">
+                  {draft.gaze_source}
+                </span>
               </button>
-            </span>
-          ))}
-          {draft.excluded_apps.length === 0 && (
-            <span className="text-xs text-[var(--tc-ink-muted)]">
-              No excluded apps configured yet.
-            </span>
-          )}
+              <SettingSwitchRow
+                label="Opt-In Keyboard Timing Telemetry"
+                description="Records anonymous key hold and flight intervals only. Never logs which keys are pressed."
+                checked={Boolean(draft.keyboard_cadence_telemetry)}
+                onToggle={() =>
+                  updateField("keyboard_cadence_telemetry", !draft.keyboard_cadence_telemetry)
+                }
+              />
+            </div>
+          </section>
         </div>
+      )}
 
-        <div className="mt-3.5 flex flex-wrap items-center gap-2.5">
-          <input
-            type="text"
-            value={newAppInput}
-            onChange={(e) => setNewAppInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addExcludedApp(newAppInput);
-              }
-            }}
-            placeholder="App name or bundle ID (e.g. Figma, Photoshop)"
-            className="min-h-11 min-w-[240px] flex-1 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-bg)] px-3.5 text-sm text-[var(--tc-ink)]"
-          />
-          <button
-            type="button"
-            onClick={() => addExcludedApp(newAppInput)}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-[var(--tc-primary)] px-4 text-sm font-semibold text-white hover:bg-[var(--tc-primary-hover)]"
-          >
-            <Plus className="h-4 w-4" aria-hidden="true" />
-            <span>Add App</span>
-          </button>
+      {/* Tab 2: Shortcuts & Per-App Exclusions */}
+      {activeTab === "shortcuts" && (
+        <div className="space-y-8">
+          <section className="space-y-3">
+            <h3 className="cc-section-label">Keyboard Modifiers &amp; Hotkey</h3>
+            <div className="cc-sheet divide-y divide-[var(--tc-border)]">
+              <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
+                <div>
+                  <label htmlFor="bypass-key-select" className="block text-[15.5px] font-medium text-[var(--tc-ink)]">
+                    Hold-to-Bypass Key
+                  </label>
+                  <p className="text-[14px] text-[var(--tc-ink-muted)]">
+                    Hold this key to pause smoothing temporarily for freehand drawing.
+                  </p>
+                </div>
+                <select
+                  id="bypass-key-select"
+                  value={draft.bypass_key}
+                  onChange={(e) => updateField("bypass_key", e.target.value as BypassKeyOption)}
+                  className="min-h-12 w-[240px] rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface-alt)] px-3.5 text-[15px] font-medium text-[var(--tc-ink)]"
+                >
+                  {BYPASS_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
+                <div>
+                  <label htmlFor="precision-key-select" className="block text-[15.5px] font-medium text-[var(--tc-ink)]">
+                    Precision Slow-Mode Key
+                  </label>
+                  <p className="text-[14px] text-[var(--tc-ink-muted)]">
+                    Hold to slow the pointer to 35% speed for very small controls.
+                  </p>
+                </div>
+                <select
+                  id="precision-key-select"
+                  value={draft.precision_key}
+                  onChange={(e) => updateField("precision_key", e.target.value as PrecisionKeyOption)}
+                  className="min-h-12 w-[240px] rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface-alt)] px-3.5 text-[15px] font-medium text-[var(--tc-ink)]"
+                >
+                  {PRECISION_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
+                <div>
+                  <label htmlFor="global-shortcut-input" className="block text-[15.5px] font-medium text-[var(--tc-ink)]">
+                    Global Toggle Hotkey
+                  </label>
+                  <p className="text-[14px] text-[var(--tc-ink-muted)]">
+                    Emergency Stop All is always bound to Cmd/Ctrl+Alt+Esc.
+                  </p>
+                </div>
+                <input
+                  id="global-shortcut-input"
+                  type="text"
+                  value={draft.global_shortcut}
+                  onChange={(e) => updateField("global_shortcut", e.target.value)}
+                  className="min-h-12 w-[240px] rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface-alt)] px-3.5 font-mono text-[14.5px] font-medium text-[var(--tc-ink)]"
+                />
+              </div>
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <h3 className="cc-section-label">Excluded Applications</h3>
+            <p className="text-[14.5px] text-[var(--tc-ink-muted)]">
+              ClearCursor pauses cursor filtering automatically whenever one of these apps is in front.
+            </p>
+
+            <div className="flex flex-wrap gap-2">
+              {draft.excluded_apps.map((app) => (
+                <span
+                  key={app}
+                  className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[var(--tc-mint)] px-3.5 text-[14.5px] font-medium text-[var(--tc-primary-ink)]"
+                >
+                  <span>{app}</span>
+                  <button
+                    type="button"
+                    aria-label={`Remove excluded app ${app}`}
+                    onClick={() => removeExcludedApp(app)}
+                    className="rounded-md p-1 hover:bg-[var(--tc-surface)]"
+                  >
+                    <X className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </span>
+              ))}
+              {draft.excluded_apps.length === 0 && (
+                <span className="text-[14.5px] text-[var(--tc-ink-muted)]">
+                  No excluded apps added yet.
+                </span>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <input
+                type="text"
+                value={newAppInput}
+                onChange={(e) => setNewAppInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addExcludedApp(newAppInput);
+                  }
+                }}
+                placeholder="App name or bundle ID (e.g. Figma, Photoshop)"
+                className="min-h-12 min-w-[260px] flex-1 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-4 text-[15px] text-[var(--tc-ink)]"
+              />
+              <button
+                type="button"
+                onClick={() => addExcludedApp(newAppInput)}
+                className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-[var(--tc-primary)] px-5 text-[15px] font-semibold text-white hover:bg-[var(--tc-primary-hover)]"
+              >
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                <span>Add App</span>
+              </button>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="text-[14px] text-[var(--tc-ink-muted)]">Quick add:</span>
+              {SUGGESTED_EXCLUDED_APPS.map((name) => (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => addExcludedApp(name)}
+                  className="min-h-11 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-3.5 text-[14px] font-medium text-[var(--tc-ink)] hover:bg-[var(--tc-mint)]"
+                >
+                  + {name}
+                </button>
+              ))}
+            </div>
+          </section>
         </div>
+      )}
 
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="text-xs text-[var(--tc-ink-muted)]">Quick add:</span>
-          {SUGGESTED_EXCLUDED_APPS.map((name) => (
-            <button
-              key={name}
-              type="button"
-              onClick={() => addExcludedApp(name)}
-              className="rounded-lg border border-[var(--tc-border)] bg-[var(--tc-surface-alt)] px-2.5 py-1 text-xs font-medium text-[var(--tc-ink)] transition-colors hover:bg-[var(--tc-mint)]"
-            >
-              + {name}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Expandable Advanced Tuning */}
-      <section className="space-y-4">
-        <button
-          type="button"
-          aria-expanded={advancedOpen}
-          onClick={() => setAdvancedOpen((prev) => !prev)}
-          className="cc-card flex min-h-14 w-full items-center justify-between gap-4 px-5 text-left text-sm font-semibold text-[var(--tc-ink)] transition-colors hover:bg-[var(--tc-surface-alt)]"
-        >
-          <span>Advanced Tuning (One Euro, Click-Freeze, Bounce Guard, Gravity Wells &amp; Dwell)</span>
-          {advancedOpen ? (
-            <ChevronUp className="h-5 w-5 shrink-0 text-[var(--tc-ink-muted)]" aria-hidden="true" />
-          ) : (
-            <ChevronDown className="h-5 w-5 shrink-0 text-[var(--tc-ink-muted)]" aria-hidden="true" />
-          )}
-        </button>
-
-        {advancedOpen && (
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {/* Tab 3: Advanced Filter Constants (Flat Divided Rows — Zero Nested Boxes) */}
+      {activeTab === "advanced" && (
+        <div className="space-y-6">
+          <div className="cc-sheet divide-y divide-[var(--tc-border)] px-6">
             <SteppedControl
               id="tremor-strength"
               label="Stabilization Strength"
@@ -641,41 +598,36 @@ export function SensitivityPanel({
               unit="ms"
               onChange={(v) => updateField("anti_drag_hold_ms", v)}
             />
-
-            {displaySummary && displaySummary.displays.length > 0 && (
-              <div className="cc-card p-5 lg:col-span-2">
-                <div className="mb-3 flex items-center gap-2 text-xs font-semibold text-[var(--tc-primary-ink)]">
-                  <Monitor className="h-4 w-4" aria-hidden="true" />
-                  <span>
-                    Active Displays ({displaySummary.displays.length}) | Virtual Bounds{" "}
-                    {displaySummary.virtual_rect.width}x{displaySummary.virtual_rect.height}
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {displaySummary.displays.map((disp, idx) => (
-                    <div
-                      key={disp.id}
-                      className="rounded-xl bg-[var(--tc-surface-alt)] px-4 py-3 text-xs"
-                    >
-                      <p className="font-semibold text-[var(--tc-ink)]">
-                        Display {idx + 1} {disp.is_primary ? "(Primary)" : "(External)"}
-                      </p>
-                      <p className="mt-0.5 font-mono tabular-nums text-[var(--tc-ink-muted)]">
-                        {disp.width}x{disp.height} at ({disp.left}, {disp.top}) | {disp.refresh_hz} Hz |{" "}
-                        {disp.scale_factor}x DPI
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
-        )}
-      </section>
 
-      {/* Sticky Save Action Bar */}
-      <div className="cc-card sticky bottom-4 z-20 flex flex-wrap items-center justify-between gap-4 px-5 py-4">
-        <div role="status" aria-live="polite" className="text-sm font-medium text-[var(--tc-primary-ink)]">
+          {displaySummary && displaySummary.displays.length > 0 && (
+            <section className="space-y-2 border-t border-[var(--tc-border)] pt-6">
+              <div className="flex items-center gap-2 text-[14.5px] font-semibold text-[var(--tc-ink)]">
+                <Monitor className="h-4 w-4 text-[var(--tc-ink-muted)]" aria-hidden="true" />
+                <span>
+                  Connected Displays ({displaySummary.displays.length})
+                </span>
+              </div>
+              <ul className="divide-y divide-[var(--tc-border)] text-[14px]">
+                {displaySummary.displays.map((disp, idx) => (
+                  <li key={disp.id} className="flex flex-wrap justify-between gap-2 py-2.5">
+                    <span className="font-medium text-[var(--tc-ink)]">
+                      Display {idx + 1} {disp.is_primary ? "(Primary)" : "(External)"}
+                    </span>
+                    <span className="font-mono tabular-nums text-[var(--tc-ink-muted)]">
+                      {disp.width}x{disp.height} | {disp.refresh_hz} Hz | {disp.scale_factor}x DPI
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+      )}
+
+      {/* Save Action Footer */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--tc-border)] pt-5">
+        <div role="status" aria-live="polite" className="text-[14.5px] font-medium">
           {savedNotice ? (
             <span className="inline-flex items-center gap-2 text-[var(--tc-success)]">
               <Check className="h-4 w-4" aria-hidden="true" />
@@ -683,7 +635,7 @@ export function SensitivityPanel({
             </span>
           ) : (
             <span className="text-[var(--tc-ink-muted)]">
-              One-tap presets save immediately. Manual adjustments apply when you save.
+              Save to apply your changes across the desktop engine.
             </span>
           )}
         </div>
@@ -692,7 +644,7 @@ export function SensitivityPanel({
           type="button"
           disabled={saving}
           onClick={() => void handleSave()}
-          className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-[var(--tc-primary)] px-6 text-sm font-semibold text-white transition-colors hover:bg-[var(--tc-primary-hover)] disabled:opacity-50"
+          className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-[var(--tc-primary)] px-6 text-[15px] font-semibold text-white transition-colors hover:bg-[var(--tc-primary-hover)] disabled:opacity-50"
         >
           <Save className="h-4 w-4" aria-hidden="true" />
           <span>{saving ? "Saving..." : "Save Settings"}</span>

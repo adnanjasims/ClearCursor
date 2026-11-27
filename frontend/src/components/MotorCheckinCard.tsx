@@ -11,15 +11,15 @@ type CheckinPhase = "idle" | "hold" | "taps" | "submitting" | "done";
 
 const HOLD_DURATION_SEC = 10;
 const STAGE_W = 440;
-const STAGE_H = 220;
+const STAGE_H = 210;
 const CENTER_X = STAGE_W / 2;
 const CENTER_Y = STAGE_H / 2;
 
 const TAP_TARGETS: { x: number; y: number }[] = [
-  { x: 96, y: 64 },
-  { x: 344, y: 64 },
-  { x: 112, y: 162 },
-  { x: 328, y: 162 },
+  { x: 96, y: 60 },
+  { x: 344, y: 60 },
+  { x: 112, y: 152 },
+  { x: 328, y: 152 },
 ];
 
 const CONTEXT_OPTIONS: { value: MotorCheckinContext; label: string }[] = [
@@ -155,21 +155,24 @@ export function MotorCheckinCard({ onCompleted }: MotorCheckinCardProps) {
     }
   };
 
-  const holdPct = Math.max(0, Math.min(100, ((HOLD_DURATION_SEC - secondsLeft) / HOLD_DURATION_SEC) * 100));
+  const holdPct = Math.max(
+    0,
+    Math.min(100, ((HOLD_DURATION_SEC - secondsLeft) / HOLD_DURATION_SEC) * 100)
+  );
   const activeTap = TAP_TARGETS[tapIndex];
 
   return (
-    <section aria-labelledby="motor-checkin-heading" className="cc-card p-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <section aria-labelledby="motor-checkin-heading" className="space-y-5 border-t border-[var(--tc-border)] pt-8">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <Timer className="h-5 w-5 text-[var(--tc-primary-ink)]" aria-hidden="true" />
-            <h3 id="motor-checkin-heading" className="text-lg font-semibold text-[var(--tc-ink)]">
+            <Timer className="h-5 w-5 text-[var(--tc-teal)]" aria-hidden="true" />
+            <h3 id="motor-checkin-heading" className="text-[18px] font-semibold text-[var(--tc-ink)]">
               15-Second Guided Motor Check-In
             </h3>
           </div>
-          <p className="max-w-2xl text-sm text-[var(--tc-ink-muted)]">
-            Standardized 10-second steady hold plus 4 target taps. Ideal before or after medication doses so your report has consistent daily baselines even on light computer-use days.
+          <p className="max-w-2xl text-[15px] text-[var(--tc-ink-muted)]">
+            A quick 10-second steady hold and 4 target taps give consistent baselines before or after medication, even on light computer-use days.
           </p>
         </div>
 
@@ -177,9 +180,9 @@ export function MotorCheckinCard({ onCompleted }: MotorCheckinCardProps) {
           <button
             type="button"
             onClick={resetCheckin}
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-[var(--tc-border)] bg-[var(--tc-surface)] px-3.5 text-xs font-semibold text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)]"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-4 text-[14px] font-medium text-[var(--tc-ink)] hover:bg-[var(--tc-surface-alt)]"
           >
-            <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+            <RotateCcw className="h-4 w-4" aria-hidden="true" />
             <span>Reset</span>
           </button>
         )}
@@ -188,21 +191,21 @@ export function MotorCheckinCard({ onCompleted }: MotorCheckinCardProps) {
       {error && (
         <div
           role="alert"
-          className="mt-4 rounded-xl bg-[var(--tc-alert-bg)] px-4 py-3 text-sm font-medium text-[var(--tc-alert)]"
+          className="rounded-xl bg-[var(--tc-alert-bg)] px-4 py-3 text-[14.5px] font-medium text-[var(--tc-alert)]"
         >
           {error}
         </div>
       )}
 
       {phase === "idle" && (
-        <div className="mt-5 flex flex-wrap items-end gap-3">
-          <label className="flex flex-col gap-1.5 text-xs font-medium text-[var(--tc-ink-muted)]">
+        <div className="flex flex-wrap items-end gap-3">
+          <label className="flex flex-col gap-1.5 text-[14px] font-medium text-[var(--tc-ink-muted)]">
             <span>Context</span>
             <select
               aria-label="Check-in context"
               value={contextTag}
               onChange={(e) => setContextTag(e.target.value as MotorCheckinContext)}
-              className="min-h-12 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-3.5 text-sm font-medium text-[var(--tc-ink)]"
+              className="min-h-12 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-4 text-[15px] font-medium text-[var(--tc-ink)]"
             >
               {CONTEXT_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -212,21 +215,21 @@ export function MotorCheckinCard({ onCompleted }: MotorCheckinCardProps) {
             </select>
           </label>
 
-          <label className="flex min-w-[220px] flex-1 flex-col gap-1.5 text-xs font-medium text-[var(--tc-ink-muted)]">
+          <label className="flex min-w-[220px] flex-1 flex-col gap-1.5 text-[14px] font-medium text-[var(--tc-ink-muted)]">
             <span>Optional Note</span>
             <input
               type="text"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="e.g. 45 min after morning dose"
-              className="min-h-12 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-3.5 text-sm text-[var(--tc-ink)]"
+              className="min-h-12 rounded-xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)] px-4 text-[15px] text-[var(--tc-ink)]"
             />
           </label>
 
           <button
             type="button"
             onClick={startCheckin}
-            className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-[var(--tc-primary)] px-5 text-sm font-semibold text-white transition-colors hover:bg-[var(--tc-primary-hover)]"
+            className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-[var(--tc-primary)] px-5 text-[15px] font-semibold text-white transition-colors hover:bg-[var(--tc-primary-hover)]"
           >
             <Play className="h-4 w-4 fill-current" aria-hidden="true" />
             <span>Start 15-Sec Check-In</span>
@@ -235,8 +238,8 @@ export function MotorCheckinCard({ onCompleted }: MotorCheckinCardProps) {
       )}
 
       {(phase === "hold" || phase === "taps" || phase === "submitting") && (
-        <div className="mt-5 space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-[15px]">
             <span className="font-semibold text-[var(--tc-ink)]">
               {phase === "hold"
                 ? "Step 1 of 2: Hold your pointer steadily inside the center ring"
@@ -244,7 +247,7 @@ export function MotorCheckinCard({ onCompleted }: MotorCheckinCardProps) {
                   ? `Step 2 of 2: Click target ${tapIndex + 1} of ${TAP_TARGETS.length}`
                   : "Scoring postural hold and tap accuracy..."}
             </span>
-            <span className="font-mono text-sm font-semibold text-[var(--tc-primary-ink)] tabular-nums">
+            <span className="font-mono font-semibold text-[var(--tc-primary-ink)] tabular-nums">
               {phase === "hold" ? `${secondsLeft.toFixed(1)}s left` : `${tapIndex}/${TAP_TARGETS.length} taps`}
             </span>
           </div>
@@ -254,7 +257,7 @@ export function MotorCheckinCard({ onCompleted }: MotorCheckinCardProps) {
             onPointerDown={(e) => void handleStagePointerDown(e)}
             role="application"
             aria-label="Guided motor check-in interactive stage"
-            className="relative mx-auto h-[220px] w-full max-w-[440px] select-none overflow-hidden rounded-2xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface-alt)] cursor-crosshair"
+            className="relative mx-auto h-[220px] w-full max-w-[460px] cursor-crosshair select-none overflow-hidden rounded-2xl border border-[var(--tc-border-strong)] bg-[var(--tc-surface)]"
           >
             <svg viewBox={`0 0 ${STAGE_W} ${STAGE_H}`} className="h-full w-full">
               {phase === "hold" && (
@@ -262,28 +265,28 @@ export function MotorCheckinCard({ onCompleted }: MotorCheckinCardProps) {
                   <circle
                     cx={CENTER_X}
                     cy={CENTER_Y}
-                    r="38"
-                    fill="var(--tc-surface)"
+                    r="36"
+                    fill="var(--tc-surface-alt)"
                     stroke="var(--tc-border-strong)"
-                    strokeWidth="2"
+                    strokeWidth="1.5"
                   />
                   <circle
                     cx={CENTER_X}
                     cy={CENTER_Y}
-                    r="38"
+                    r="36"
                     fill="none"
-                    stroke="var(--tc-primary)"
-                    strokeWidth="4"
-                    strokeDasharray={`${(holdPct / 100) * 239} 239`}
+                    stroke="var(--tc-teal)"
+                    strokeWidth="3.5"
+                    strokeDasharray={`${(holdPct / 100) * 226} 226`}
                     transform={`rotate(-90 ${CENTER_X} ${CENTER_Y})`}
                   />
-                  <circle cx={CENTER_X} cy={CENTER_Y} r="5" fill="var(--tc-primary)" />
+                  <circle cx={CENTER_X} cy={CENTER_Y} r="4.5" fill="var(--tc-teal)" />
                   <circle
                     cx={cursorPt.x}
                     cy={cursorPt.y}
-                    r="6"
-                    fill="var(--tc-alert)"
-                    fillOpacity="0.8"
+                    r="5.5"
+                    fill="var(--tc-coral)"
+                    fillOpacity="0.85"
                   />
                 </>
               )}
@@ -293,12 +296,12 @@ export function MotorCheckinCard({ onCompleted }: MotorCheckinCardProps) {
                   <circle
                     cx={activeTap.x}
                     cy={activeTap.y}
-                    r="28"
+                    r="26"
                     fill="var(--tc-mint)"
                     stroke="var(--tc-primary)"
-                    strokeWidth="2.5"
+                    strokeWidth="2"
                   />
-                  <circle cx={activeTap.x} cy={activeTap.y} r="6" fill="var(--tc-primary)" />
+                  <circle cx={activeTap.x} cy={activeTap.y} r="5.5" fill="var(--tc-primary)" />
                 </>
               )}
             </svg>
@@ -307,44 +310,44 @@ export function MotorCheckinCard({ onCompleted }: MotorCheckinCardProps) {
       )}
 
       {phase === "done" && result && (
-        <div className="mt-5 rounded-2xl bg-[var(--tc-success-bg)] p-4">
+        <div className="rounded-2xl bg-[var(--tc-success-bg)] p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-[var(--tc-success)]">
-              <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+            <div className="flex items-center gap-2 text-[15px] font-semibold text-[var(--tc-success)]">
+              <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
               <span>Check-In Recorded ({result.context_tag.replace("_", " ")})</span>
             </div>
             <button
               type="button"
               onClick={resetCheckin}
-              className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-[var(--tc-surface)] px-3 text-xs font-semibold text-[var(--tc-ink)]"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-[var(--tc-surface)] px-4 text-[14px] font-medium text-[var(--tc-ink)]"
             >
-              <Crosshair className="h-3.5 w-3.5" aria-hidden="true" />
+              <Crosshair className="h-4 w-4" aria-hidden="true" />
               <span>Run Another</span>
             </button>
           </div>
 
-          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-xl bg-[var(--tc-surface)] px-3.5 py-2.5">
-              <p className="text-xs text-[var(--tc-ink-muted)]">Overall Score</p>
-              <p className="mt-0.5 text-lg font-semibold text-[var(--tc-ink)] tabular-nums">
+          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4 tabular-nums">
+            <div>
+              <p className="text-[13.5px] text-[var(--tc-ink-muted)]">Overall Score</p>
+              <p className="text-[20px] font-semibold text-[var(--tc-ink)]">
                 {result.overall_score.toFixed(1)}/100
               </p>
             </div>
-            <div className="rounded-xl bg-[var(--tc-surface)] px-3.5 py-2.5">
-              <p className="text-xs text-[var(--tc-ink-muted)]">Hold RMS Sway</p>
-              <p className="mt-0.5 text-lg font-semibold text-[var(--tc-ink)] tabular-nums">
+            <div>
+              <p className="text-[13.5px] text-[var(--tc-ink-muted)]">Hold RMS Sway</p>
+              <p className="text-[20px] font-semibold text-[var(--tc-ink)]">
                 {result.hold_rms_mm.toFixed(2)} mm
               </p>
             </div>
-            <div className="rounded-xl bg-[var(--tc-surface)] px-3.5 py-2.5">
-              <p className="text-xs text-[var(--tc-ink-muted)]">Dominant Freq</p>
-              <p className="mt-0.5 text-lg font-semibold text-[var(--tc-ink)] tabular-nums">
+            <div>
+              <p className="text-[13.5px] text-[var(--tc-ink-muted)]">Dominant Freq</p>
+              <p className="text-[20px] font-semibold text-[var(--tc-ink)]">
                 {result.hold_dominant_hz !== null ? `${result.hold_dominant_hz.toFixed(1)} Hz` : "None"}
               </p>
             </div>
-            <div className="rounded-xl bg-[var(--tc-surface)] px-3.5 py-2.5">
-              <p className="text-xs text-[var(--tc-ink-muted)]">Tap Accuracy</p>
-              <p className="mt-0.5 text-lg font-semibold text-[var(--tc-ink)] tabular-nums">
+            <div>
+              <p className="text-[13.5px] text-[var(--tc-ink-muted)]">Tap Accuracy</p>
+              <p className="text-[20px] font-semibold text-[var(--tc-ink)]">
                 {result.tap_accuracy_pct !== null ? `${result.tap_accuracy_pct.toFixed(0)}%` : "-"}
               </p>
             </div>
